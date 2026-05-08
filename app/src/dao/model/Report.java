@@ -3,25 +3,30 @@ package dao.model;
 import java.util.Objects;
 import java.util.UUID;
 
-public final class Report {
-    public final UUID messageId;
-    public final UUID userId;
+public final class Report implements HasUUID{
+    public final UUID message;
+    public final UUID user;
     public final long timestamp;
 
     public Report(UUID messageId, UUID userId, long timestamp) {
-        this.messageId = messageId;
-        this.userId = userId;
+        this.message = messageId;
+        this.user = userId;
         this.timestamp = timestamp;
+    }
+
+    @Override
+    public UUID getUUID(){
+        return message;
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Report other)) return false;
-        return messageId.equals(other.messageId) && userId.equals(other.userId);
+        return message.equals(other.message) && user.equals(other.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageId, userId);
+        return Objects.hash(message, user);
     }
 }
