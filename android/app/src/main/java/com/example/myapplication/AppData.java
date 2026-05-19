@@ -12,11 +12,13 @@ import java.util.UUID;
 import dao.PostDAO;
 import dao.UserDAO;
 import dao.model.Message;
+import dao.model.Like;
 import dao.model.Post;
 import dao.model.Report;
 import dao.model.TimestampFormatter;
 import dao.model.TimestampFormatterTimeSinceEnglish;
 import dao.model.User;
+import engagement.LikeManager;
 import moderation.ModerationTools;
 
 public final class AppData {
@@ -51,10 +53,12 @@ public final class AppData {
         UserDAO.getInstance().clear();
         PostDAO.getInstance().clear();
         ModerationTools.clearAll();
+        LikeManager.clearAll();
 
         seedUsers();
         seedForumThreads();
         seedModerationState();
+        seedLikeState();
 
         adminMode = false;
         populated = true;
@@ -224,6 +228,56 @@ public final class AppData {
         return post;
     }
 
+    public static boolean togglePostLike(Post post) {
+        ensurePopulated();
+        User user = getCurrentUser();
+        return post != null
+                && user != null
+                && LikeManager.toggleLike(Like.TargetType.POST, post.id, user.id(), System.currentTimeMillis());
+    }
+
+    public static boolean toggleMessageLike(Message message) {
+        ensurePopulated();
+        User user = getCurrentUser();
+        return message != null
+                && user != null
+                && LikeManager.toggleLike(Like.TargetType.MESSAGE, message.id(), user.id(), System.currentTimeMillis());
+    }
+
+    public static String getPostLikeLabel(Context context, Post post) {
+        return getLikeLabel(
+                hasCurrentUserLiked(Like.TargetType.POST, post == null ? null : post.id),
+                LikeManager.getLikeCount(Like.TargetType.POST, post == null ? null : post.id)
+        );
+    }
+
+    public static boolean hasCurrentUserLikedPost(Post post) {
+        return hasCurrentUserLiked(Like.TargetType.POST, post == null ? null : post.id);
+    }
+
+    public static String getPostLikeCountLabel(Context context, Post post) {
+        return String.valueOf(LikeManager.getLikeCount(Like.TargetType.POST, post == null ? null : post.id));
+    }
+
+    public static String getPostReplyCountLabel(Context context, Post post) {
+        return String.valueOf(getVisibleMessageCount(post));
+    }
+
+    public static String getMessageLikeLabel(Context context, Message message) {
+        return getLikeLabel(
+                hasCurrentUserLiked(Like.TargetType.MESSAGE, message == null ? null : message.id()),
+                LikeManager.getLikeCount(Like.TargetType.MESSAGE, message == null ? null : message.id())
+        );
+    }
+
+    public static boolean hasCurrentUserLikedMessage(Message message) {
+        return hasCurrentUserLiked(Like.TargetType.MESSAGE, message == null ? null : message.id());
+    }
+
+    public static String getMessageLikeCountLabel(Context context, Message message) {
+        return String.valueOf(LikeManager.getLikeCount(Like.TargetType.MESSAGE, message == null ? null : message.id()));
+    }
+
     public static boolean toggleHidden(Message message) {
         ensurePopulated();
         if (!adminMode || message == null || adminViewer == null) {
@@ -249,7 +303,7 @@ public final class AppData {
             parts.add(context.getString(R.string.message_reported_by_you));
         }
         if (parts.isEmpty()) {
-            return context.getString(adminMode ? R.string.message_visible_admin : R.string.message_visible_member);
+            return adminMode ? context.getString(R.string.message_visible_admin) : "";
         }
         return joinWithBullets(parts);
     }
@@ -357,6 +411,49 @@ public final class AppData {
         ModerationTools.addReport(queueExampleMessage.id(), treeSage.id(), now - minutes(39));
     }
 
+    private static void seedLikeState() {
+        long now = System.currentTimeMillis();
+        ArrayList<Post> posts = new ArrayList<>();
+        Iterator<Post> iterator = PostDAO.getInstance().getAll();
+        while (iterator.hasNext()) {
+            posts.add(iterator.next());
+        }
+        posts.sort(Comparator.comparingLong(AppData::getLatestActivityTimestamp).reversed());
+        for (int i = 0; i < posts.size(); i++) {
+            Post post = posts.get(i);
+            if (i == 0) {
+                seedLike(post, studyBuddy, now - minutes(18));
+                seedLike(post, uxPilot, now - minutes(17));
+            } else if (i == 1) {
+                seedLike(post, treeSage, now - minutes(42));
+            } else if (i == 3) {
+                seedLike(post, lateCoder, now - minutes(58));
+                seedLike(post, uxPilot, now - minutes(57));
+                seedLike(post, adminViewer, now - minutes(56));
+            }
+
+            ArrayList<Message> messages = collectMessages(post.messages.getAll());
+            if (!messages.isEmpty() && i % 2 == 0) {
+                seedLike(messages.get(0), treeSage, now - minutes(15 + i));
+            }
+            if (messages.size() > 1 && i == 2) {
+                seedLike(messages.get(1), studyBuddy, now - minutes(33));
+            }
+        }
+    }
+
+    private static void seedLike(Post post, User user, long timestamp) {
+        if (post != null && user != null) {
+            LikeManager.loadLike(new Like(Like.TargetType.POST, post.id, user.id(), timestamp));
+        }
+    }
+
+    private static void seedLike(Message message, User user, long timestamp) {
+        if (message != null && user != null) {
+            LikeManager.loadLike(new Like(Like.TargetType.MESSAGE, message.id(), user.id(), timestamp));
+        }
+    }
+
     private static User addUser(String username, User.Role role) {
         User user = new User(UUID.randomUUID(), role, username, "demo1234");
         UserDAO.getInstance().add(user);
@@ -413,6 +510,15 @@ public final class AppData {
             builder.append(parts.get(i));
         }
         return builder.toString();
+    }
+
+    private static boolean hasCurrentUserLiked(Like.TargetType targetType, UUID targetId) {
+        User user = getCurrentUser();
+        return user != null && targetId != null && LikeManager.hasLiked(targetType, targetId, user.id());
+    }
+
+    private static String getLikeLabel(boolean liked, int count) {
+        return (liked ? "♥ " : "♡ ") + count;
     }
 
     private static boolean isChinese() {

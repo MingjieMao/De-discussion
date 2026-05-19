@@ -19,7 +19,7 @@
     <string name="drawer_profile_heading">Profile</string>
     <string name="drawer_change_avatar">Edit avatar</string>
     <string name="drawer_workspace_title">Workspace</string>
-    <string name="drawer_workspace_subtitle">A slim navigation hub inspired by cleaner forum apps, with your settings anchored at the bottom.</string>
+    <string name="drawer_workspace_subtitle">Admin tools for switching views and reviewing reported replies.</string>
     <string name="drawer_uid_label">UID</string>
     <string name="drawer_nickname_label">Nickname</string>
     <string name="drawer_quick_access">Quick Access</string>
@@ -54,6 +54,8 @@
     <string name="action_undo_report">Undo Report</string>
     <string name="action_new_post">New Post</string>
     <string name="action_publish">Publish</string>
+    <string name="action_like">Like</string>
+    <string name="reply_count_desc">Reply count</string>
 
     <string name="dialog_edit_uid_title">Edit UID</string>
     <string name="dialog_edit_nickname_title">Edit Nickname</string>

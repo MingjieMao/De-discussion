@@ -20,16 +20,6 @@
             android:text="@string/action_back"
             android:textAllCaps="false"
             android:textColor="@color/white" />
-
-        <Button
-            android:id="@+id/buttonQueue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:backgroundTint="@color/warning_ink"
-            android:text="@string/action_open_queue"
-            android:textAllCaps="false"
-            android:textColor="@color/white" />
     </LinearLayout>
 
     <TextView

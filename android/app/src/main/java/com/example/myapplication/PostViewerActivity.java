@@ -1,6 +1,5 @@
 package com.example.myapplication;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -28,7 +27,6 @@ public class PostViewerActivity extends AppCompatActivity {
     private TextView textPostViewerAuthor;
     private TextView textPostViewerSummary;
     private Button buttonBack;
-    private Button buttonQueue;
     private RecyclerView recyclerMessages;
     private Post post;
 
@@ -54,17 +52,12 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerAuthor = findViewById(R.id.textPostViewerAuthor);
         textPostViewerSummary = findViewById(R.id.textPostViewerSummary);
         buttonBack = findViewById(R.id.buttonBack);
-        buttonQueue = findViewById(R.id.buttonQueue);
         recyclerMessages = findViewById(R.id.recyclerMessages);
 
         recyclerMessages.setLayoutManager(new LinearLayoutManager(this));
         post = AppData.getPostById(getIntent().getStringExtra(EXTRA_POST_ID));
 
         buttonBack.setOnClickListener(v -> finish());
-        buttonQueue.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), ModerationQueueActivity.class);
-            startActivity(intent);
-        });
     }
 
     @Override
@@ -79,7 +72,6 @@ public class PostViewerActivity extends AppCompatActivity {
             textPostViewerTitle.setText(R.string.post_not_found);
             textPostViewerAuthor.setText(R.string.post_not_found_body);
             textPostViewerSummary.setText(R.string.post_not_found_summary);
-            buttonQueue.setVisibility(View.GONE);
             recyclerMessages.setAdapter(new MessageAdapter(new ArrayList<>()));
             return;
         }
@@ -88,12 +80,10 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerTitle.setText(post.topic);
         textPostViewerAuthor.setText(AppData.getPostMeta(this, post));
         textPostViewerSummary.setText(AppData.getPostSummary(this, post));
-
-        buttonQueue.setVisibility(AppData.isAdminMode() ? View.VISIBLE : View.GONE);
-
         ArrayList<Message> messages = AppData.getMessages(post);
         MessageAdapter adapter = new MessageAdapter(messages);
         adapter.setOnMessageActionListener(this::handleMessageAction);
+        adapter.setOnMessageLikeListener(AppData::toggleMessageLike);
         recyclerMessages.setAdapter(adapter);
     }
 

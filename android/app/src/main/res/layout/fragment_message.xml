@@ -11,7 +11,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:gravity="bottom"
         android:orientation="horizontal">
 
         <TextView
@@ -46,19 +46,50 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
+        <LinearLayout
+            android:id="@+id/buttonMessageLike"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:minWidth="56dp"
+            android:orientation="horizontal"
+            android:paddingEnd="16dp">
+
+            <ImageView
+                android:id="@+id/iconMessageLike"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/action_like" />
+
+            <TextView
+                android:id="@+id/textMessageLikeCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/ink_secondary" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/textMessageState"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
-            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
             android:textAppearance="?attr/textAppearanceBodySmall"
             android:textColor="@color/ink_secondary" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/buttonMessageMenu"
             android:layout_width="44dp"
             android:layout_height="44dp"
+            android:layout_gravity="bottom|end"
             android:background="@android:color/transparent"
             android:contentDescription="@string/action_report"
             android:padding="10dp"

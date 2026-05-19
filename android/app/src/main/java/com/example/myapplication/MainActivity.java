@@ -77,20 +77,14 @@ public class MainActivity extends AppCompatActivity {
         labelNotifications = findViewById(R.id.labelNotifications);
         labelYou = findViewById(R.id.labelYou);
 
-        Button buttonDrawerHome = findViewById(R.id.buttonDrawerHome);
         buttonDrawerQueue = findViewById(R.id.buttonDrawerQueue);
         buttonDrawerMode = findViewById(R.id.buttonDrawerMode);
         Button buttonDrawerDrafts = findViewById(R.id.buttonDrawerDrafts);
         Button buttonDrawerTeamSpace = findViewById(R.id.buttonDrawerTeamSpace);
-        Button buttonDrawerSettings = findViewById(R.id.buttonDrawerSettings);
 
         applyInsets(mainContent, true);
         applyInsets(drawerPanel, false);
 
-        buttonDrawerHome.setOnClickListener(v -> {
-            drawerRoot.closeDrawer(GravityCompat.START);
-            setPage(MainPagerAdapter.PAGE_CHANNELS, true);
-        });
         buttonDrawerQueue.setOnClickListener(v -> openModerationQueue());
         buttonDrawerMode.setOnClickListener(v -> {
             toggleViewerMode();
@@ -100,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(R.string.toast_feature_coming_soon), Toast.LENGTH_SHORT).show());
         buttonDrawerTeamSpace.setOnClickListener(v ->
                 Toast.makeText(this, getString(R.string.toast_feature_coming_soon), Toast.LENGTH_SHORT).show());
-        buttonDrawerSettings.setOnClickListener(v -> showSettingsDialog());
 
         configurePager();
         configureTabBar();
@@ -250,6 +243,50 @@ public class MainActivity extends AppCompatActivity {
                 }));
 
         dialog.show();
+    }
+
+    public void showLanguageDialog() {
+        String[] languages = {
+                getString(R.string.settings_language_en),
+                getString(R.string.settings_language_zh)
+        };
+        int checked = "zh-CN".equals(UiPreferences.getLanguageTag(this)) ? 1 : 0;
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.settings_language)
+                .setSingleChoiceItems(languages, checked, (dialog, which) -> {
+                    String newLanguage = which == 1 ? "zh-CN" : "en";
+                    boolean changed = !newLanguage.equals(UiPreferences.getLanguageTag(this));
+                    UiPreferences.setLanguageTag(this, newLanguage);
+                    dialog.dismiss();
+                    if (changed) {
+                        restartForAppearanceChange();
+                    }
+                })
+                .setNegativeButton(R.string.action_cancel, null)
+                .show();
+    }
+
+    public void showThemeDialog() {
+        String[] themes = {
+                getString(R.string.settings_theme_light),
+                getString(R.string.settings_theme_dark)
+        };
+        int checked = UiPreferences.isDarkTheme(this) ? 1 : 0;
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.settings_theme)
+                .setSingleChoiceItems(themes, checked, (dialog, which) -> {
+                    boolean newDarkTheme = which == 1;
+                    boolean changed = newDarkTheme != UiPreferences.isDarkTheme(this);
+                    UiPreferences.setDarkTheme(this, newDarkTheme);
+                    dialog.dismiss();
+                    if (changed) {
+                        restartForAppearanceChange();
+                    }
+                })
+                .setNegativeButton(R.string.action_cancel, null)
+                .show();
     }
 
     private void configurePager() {

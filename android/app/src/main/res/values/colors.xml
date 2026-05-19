@@ -20,6 +20,7 @@
     <color name="warning_ink">#1C1C1E</color>
     <color name="danger_soft">#FDECEC</color>
     <color name="danger_ink">#C33131</color>
+    <color name="like_red">#E53935</color>
 
     <color name="avatar_moss">#1C1C1E</color>
     <color name="avatar_coral">#3A3A3C</color>

@@ -83,16 +83,6 @@
                 android:text="@string/channels_highlight_body"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/ink_secondary" />
-
-            <Button
-                android:id="@+id/buttonChannelsQueue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:backgroundTint="@color/warning_ink"
-                android:text="@string/action_open_queue"
-                android:textAllCaps="false"
-                android:textColor="@color/white" />
         </LinearLayout>
 
         <TextView

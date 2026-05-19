@@ -167,13 +167,12 @@
             android:padding="16dp">
 
             <Button
-                android:id="@+id/buttonDrawerHome"
+                android:id="@+id/buttonDrawerMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/accent_strong"
-                android:text="@string/drawer_home"
+                android:backgroundTint="@color/accent_soft"
                 android:textAllCaps="false"
-                android:textColor="@color/white" />
+                android:textColor="@color/accent_on_soft" />
 
             <Button
                 android:id="@+id/buttonDrawerQueue"
@@ -184,15 +183,6 @@
                 android:text="@string/drawer_queue"
                 android:textAllCaps="false"
                 android:textColor="@color/white" />
-
-            <Button
-                android:id="@+id/buttonDrawerMode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:backgroundTint="@color/accent_soft"
-                android:textAllCaps="false"
-                android:textColor="@color/accent_on_soft" />
 
             <Button
                 android:id="@+id/buttonDrawerDrafts"
@@ -214,23 +204,6 @@
                 android:textAllCaps="false"
                 android:textColor="@color/ink_primary" />
         </LinearLayout>
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/buttonDrawerSettings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/surface_alt"
-            android:drawableStart="@drawable/ic_settings_24"
-            android:drawablePadding="10dp"
-            android:gravity="start|center_vertical"
-            android:text="@string/drawer_settings"
-            android:textAllCaps="false"
-            android:textColor="@color/ink_primary" />
 
     </LinearLayout>
 

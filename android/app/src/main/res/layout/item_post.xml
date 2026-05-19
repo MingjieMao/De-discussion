@@ -25,12 +25,62 @@
         android:textAppearance="?attr/textAppearanceBodyMedium"
         android:textColor="@color/ink_secondary" />
 
-    <TextView
-        android:id="@+id/textPostCount"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:textAppearance="?attr/textAppearanceBodySmall"
-        android:textColor="@color/ink_secondary" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/buttonPostLike"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:minWidth="56dp"
+            android:paddingEnd="18dp">
+
+            <ImageView
+                android:id="@+id/iconPostLike"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/action_like" />
+
+            <TextView
+                android:id="@+id/textPostLikeCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/ink_secondary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/textPostCount"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:minWidth="56dp"
+            android:paddingEnd="18dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@string/reply_count_desc"
+                android:src="@drawable/ic_reply_count_24" />
+
+            <TextView
+                android:id="@+id/textPostReplyCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/ink_secondary" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

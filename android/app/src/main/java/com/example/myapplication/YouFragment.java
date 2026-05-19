@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,9 +20,8 @@ public class YouFragment extends Fragment implements RefreshablePage {
     private TextView textYouAvatar;
     private TextView textYouNickname;
     private TextView textYouUid;
-    private TextView textYouMode;
-    private Button buttonYouToggleMode;
-    private Button buttonYouQueue;
+    private TextView textYouLanguageValue;
+    private TextView textYouThemeValue;
 
     @Nullable
     @Override
@@ -36,16 +36,17 @@ public class YouFragment extends Fragment implements RefreshablePage {
         textYouAvatar = view.findViewById(R.id.textYouAvatar);
         textYouNickname = view.findViewById(R.id.textYouNickname);
         textYouUid = view.findViewById(R.id.textYouUid);
-        textYouMode = view.findViewById(R.id.textYouMode);
+        textYouLanguageValue = view.findViewById(R.id.textYouLanguageValue);
+        textYouThemeValue = view.findViewById(R.id.textYouThemeValue);
         Button buttonEditAvatar = view.findViewById(R.id.buttonEditAvatar);
         Button buttonEditNickname = view.findViewById(R.id.buttonEditNickname);
-        buttonYouToggleMode = view.findViewById(R.id.buttonYouToggleMode);
-        buttonYouQueue = view.findViewById(R.id.buttonYouQueue);
+        LinearLayout buttonYouLanguage = view.findViewById(R.id.buttonYouLanguage);
+        LinearLayout buttonYouTheme = view.findViewById(R.id.buttonYouTheme);
 
         buttonEditAvatar.setOnClickListener(v -> host().showAvatarPicker());
         buttonEditNickname.setOnClickListener(v -> host().showNicknameDialog());
-        buttonYouToggleMode.setOnClickListener(v -> host().toggleViewerMode());
-        buttonYouQueue.setOnClickListener(v -> host().openModerationQueue());
+        buttonYouLanguage.setOnClickListener(v -> host().showLanguageDialog());
+        buttonYouTheme.setOnClickListener(v -> host().showThemeDialog());
 
         refreshContent();
     }
@@ -58,7 +59,7 @@ public class YouFragment extends Fragment implements RefreshablePage {
 
     @Override
     public void refreshContent() {
-        if (!isAdded() || getView() == null || textYouAvatar == null || buttonYouQueue == null) {
+        if (!isAdded() || getView() == null || textYouAvatar == null) {
             return;
         }
 
@@ -67,15 +68,14 @@ public class YouFragment extends Fragment implements RefreshablePage {
 
         textYouNickname.setText(nickname);
         textYouUid.setText(getString(R.string.you_uid_format, uid));
-        textYouMode.setText(AppData.getCurrentModeLabel(requireContext()));
         textYouAvatar.setText(getAvatarLetter(nickname));
         textYouAvatar.setBackground(makeAvatarBackground(UiPreferences.getAvatarIndex(requireContext())));
-
-        buttonYouToggleMode.setText(getString(
-                AppData.isAdminMode() ? R.string.drawer_switch_member : R.string.drawer_switch_admin
-        ));
-        buttonYouQueue.setEnabled(AppData.isAdminMode());
-        buttonYouQueue.setAlpha(AppData.isAdminMode() ? 1.0f : 0.65f);
+        textYouLanguageValue.setText("zh-CN".equals(UiPreferences.getLanguageTag(requireContext()))
+                ? getString(R.string.settings_language_zh)
+                : getString(R.string.settings_language_en));
+        textYouThemeValue.setText(UiPreferences.isDarkTheme(requireContext())
+                ? getString(R.string.settings_theme_dark)
+                : getString(R.string.settings_theme_light));
     }
 
     private MainActivity host() {
