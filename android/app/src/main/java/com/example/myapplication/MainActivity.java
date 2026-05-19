@@ -255,14 +255,6 @@ public class MainActivity extends AppCompatActivity {
     private void configurePager() {
         viewPager.setAdapter(new MainPagerAdapter(this));
         viewPager.setOffscreenPageLimit(3);
-        viewPager.setPageTransformer((page, position) -> {
-            float abs = Math.abs(position);
-            float emphasis = 1f - Math.min(abs, 1f);
-            page.setAlpha(0.78f + (emphasis * 0.22f));
-            page.setTranslationX(-position * page.getWidth() * 0.05f);
-            page.setScaleX(0.97f + (emphasis * 0.03f));
-            page.setScaleY(0.97f + (emphasis * 0.03f));
-        });
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

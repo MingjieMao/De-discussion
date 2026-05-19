@@ -38,8 +38,7 @@
                 android:id="@+id/navIndicator"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:background="@drawable/bg_tab_indicator"
-                android:elevation="4dp" />
+                android:background="@drawable/bg_tab_indicator" />
 
             <LinearLayout
                 android:layout_width="match_parent"

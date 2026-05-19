@@ -27,11 +27,11 @@
     <color name="avatar_plum">#636366</color>
     <color name="avatar_sand">#8E8E93</color>
 
-    <color name="tab_bar_fill">#CC111111</color>
-    <color name="tab_bar_stroke">#2C2C2E</color>
-    <color name="tab_indicator_fill_top">#26FFFFFF</color>
-    <color name="tab_indicator_fill_bottom">#14FFFFFF</color>
-    <color name="tab_indicator_stroke">#33FFFFFF</color>
+    <color name="tab_bar_fill">#AA2C3035</color>
+    <color name="tab_bar_stroke">#4A5058</color>
+    <color name="tab_indicator_fill_top">#EEE3E9EE</color>
+    <color name="tab_indicator_fill_bottom">#EEC9D0D8</color>
+    <color name="tab_indicator_stroke">#EEF2F6</color>
     <color name="nav_active">#FFFFFF</color>
     <color name="nav_inactive">#8E8E93</color>
 </resources>
