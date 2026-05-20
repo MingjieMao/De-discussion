@@ -208,7 +208,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             int indent = Math.round(depth * 40 * itemView.getResources().getDisplayMetrics().density);
             layoutMessageRow.setPaddingRelative(indent, layoutMessageRow.getPaddingTop(), layoutMessageRow.getPaddingEnd(), layoutMessageRow.getPaddingBottom());
 
-            textMessageAvatar.setText(AppData.getAvatarLetter(message.poster()));
+            textMessageAvatar.setText(AppData.getAvatarLetter(itemView.getContext(), message.poster()));
             int avatarSize = Math.round((depth > 0 ? 24 : 32) * itemView.getResources().getDisplayMetrics().density);
             ViewGroup.LayoutParams avatarParams = textMessageAvatar.getLayoutParams();
             avatarParams.width = avatarSize;
@@ -219,7 +219,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             avatarBackground.setColor(AppData.getAvatarColor(itemView.getContext(), message.poster()));
             textMessageAvatar.setBackground(avatarBackground);
 
-            textMessageAuthor.setText(AppData.getMessageAuthorDisplayName(message));
+            textMessageAuthor.setText(AppData.getMessageAuthorDisplayName(itemView.getContext(), message));
             textMessageTimestamp.setText(AppData.formatTimestamp(message.timestamp()));
             String status = AppData.getMessageStatus(itemView.getContext(), message);
             textMessageState.setText(status);

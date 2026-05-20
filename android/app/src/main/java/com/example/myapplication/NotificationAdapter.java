@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,8 +70,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         }
 
         void display(AppData.AppNotification notification) {
-            textNotificationAvatar.setText(AppData.getAvatarLetter(notification.actorId()));
-            textNotificationAvatar.getBackground().setTint(AppData.getAvatarColor(itemView.getContext(), notification.actorId()));
+            textNotificationAvatar.setText(AppData.getAvatarLetter(itemView.getContext(), notification.actorId()));
+            GradientDrawable avatarBackground = (GradientDrawable) ContextCompat
+                    .getDrawable(itemView.getContext(), R.drawable.bg_avatar_circle)
+                    .mutate();
+            avatarBackground.setColor(AppData.getAvatarColor(itemView.getContext(), notification.actorId()));
+            textNotificationAvatar.setBackground(avatarBackground);
             textNotificationTitle.setText(notification.title());
             textNotificationTime.setText(AppData.formatTimestamp(notification.timestamp()));
             textNotificationBody.setText(notification.body());

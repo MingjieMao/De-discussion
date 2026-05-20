@@ -184,7 +184,7 @@ public class PostViewerActivity extends AppCompatActivity {
         imagePostViewerCommunityAvatar.setImageResource(AppData.getPostCommunityAvatarResId(post));
         textPostViewerMeta.setText(getString(
                 R.string.message_author_line,
-                AppData.getUsername(post.poster),
+                AppData.getDisplayName(this, post.poster),
                 AppData.getPostTimestampLabel(post)
         ));
         textPostViewerTitle.setText(post.topic);

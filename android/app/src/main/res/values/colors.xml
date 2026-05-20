@@ -25,6 +25,8 @@
     <color name="vote_down">#2F6FED</color>
     <color name="pill_fill">#F1F3F7</color>
     <color name="pill_stroke">#E0E5EE</color>
+    <color name="search_fill">#F1F3F7</color>
+    <color name="search_stroke">#E0E5EE</color>
 
     <color name="avatar_moss">#1C1C1E</color>
     <color name="avatar_coral">#3A3A3C</color>

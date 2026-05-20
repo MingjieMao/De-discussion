@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -328,14 +329,14 @@ public final class AppData {
     }
 
     public static String getPostMeta(Context context, Post post) {
-        return context.getString(R.string.post_meta_started_by, getUsername(post.poster));
+        return context.getString(R.string.post_meta_started_by, getDisplayName(context, post.poster));
     }
 
     public static String getPostFeedMeta(Context context, Post post) {
         return context.getString(
                 R.string.post_feed_meta_format,
                 getPostCommunityLabel(context, post),
-                getUsername(post.poster),
+                getDisplayName(context, post.poster),
                 getPostTimestampLabel(post)
         );
     }
@@ -343,7 +344,7 @@ public final class AppData {
     public static String getPostFeedByline(Context context, Post post) {
         return context.getString(
                 R.string.post_feed_meta_byline_format,
-                getUsername(post.poster),
+                getDisplayName(context, post.poster),
                 getPostTimestampLabel(post)
         );
     }
@@ -439,11 +440,11 @@ public final class AppData {
         return message.message();
     }
 
-    public static String getMessageAuthorDisplayName(Message message) {
+    public static String getMessageAuthorDisplayName(Context context, Message message) {
         if (message == null) {
             return "";
         }
-        String author = getUsername(message.poster());
+        String author = getDisplayName(context, message.poster());
         if (getCommentDepth(message) <= 1) {
             return author;
         }
@@ -451,7 +452,11 @@ public final class AppData {
         if (parent == null) {
             return author;
         }
-        return author + "  ▸  " + getUsername(parent.poster());
+        return author + "  ▸  " + getDisplayName(context, parent.poster());
+    }
+
+    public static String getMessageAuthorDisplayName(Message message) {
+        return getMessageAuthorDisplayName(null, message);
     }
 
     public static boolean isTopLevelComment(Message message) {
@@ -769,6 +774,17 @@ public final class AppData {
         return user.username();
     }
 
+    public static String getDisplayName(Context context, UUID userId) {
+        User currentUser = getCurrentUser();
+        if (context != null && currentUser != null && currentUser.id().equals(userId)) {
+            String nickname = UiPreferences.getProfileNickname(context);
+            if (nickname != null && !nickname.trim().isEmpty()) {
+                return nickname.trim();
+            }
+        }
+        return getUsername(userId);
+    }
+
     public static String formatTimestamp(long timestamp) {
         return TIMESTAMP_FORMATTER.format(timestamp);
     }
@@ -780,17 +796,25 @@ public final class AppData {
     public static String formatMessageAuthorLine(Context context, Message message) {
         return context.getString(
                 R.string.message_author_line,
-                getUsername(message.poster()),
+                getDisplayName(context, message.poster()),
                 formatTimestamp(message.timestamp())
         );
     }
 
-    public static String getAvatarLetter(UUID userId) {
-        String username = getUsername(userId);
-        if (username.isEmpty()) {
+    public static String getAvatarLetter(Context context, UUID userId) {
+        String label = getDisplayName(context, userId);
+        if (label == null) {
             return "?";
         }
-        return username.substring(0, 1).toUpperCase();
+        String trimmed = label.trim();
+        if (trimmed.isEmpty()) {
+            return "?";
+        }
+        return trimmed.substring(0, 1).toUpperCase(Locale.getDefault());
+    }
+
+    public static String getAvatarLetter(UUID userId) {
+        return getAvatarLetter(null, userId);
     }
 
     public static int getAvatarColor(UUID userId) {
