@@ -32,6 +32,11 @@
     <string name="feed_empty_body_generic">Create the first post in this forum to start the discussion.</string>
     <string name="feed_empty_title_forum">%1$s is quiet for now</string>
     <string name="feed_empty_body_forum">This forum is connected to the sidebar switcher, but we have not filled it with demo content yet.</string>
+    <string name="search_channel_hint">Search posts in %1$s</string>
+    <string name="search_empty_title">No matching posts</string>
+    <string name="search_empty_body">Try another keyword</string>
+    <string name="search_ai_answer_title">AI summary</string>
+    <string name="search_ai_answer_body">This looks like a question in %1$s. For now, I can surface related posts and summarize the likely direction: search for matching course codes, read the highest-scored replies first, and open the most relevant thread for context. Query: %2$s</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_language">Language</string>
@@ -43,6 +48,8 @@
 
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_clear_search">Clear search</string>
+    <string name="action_send">Send</string>
     <string name="action_back">Back</string>
     <string name="action_open_queue">Open Queue</string>
     <string name="action_edit_nickname">Edit Nickname</string>
@@ -55,7 +62,10 @@
     <string name="action_new_post">New Post</string>
     <string name="action_publish">Publish</string>
     <string name="action_add_image">Add image</string>
+    <string name="action_image_selected">Image selected</string>
     <string name="action_save_image">Save image</string>
+    <string name="action_expand_replies">View %1$d more replies</string>
+    <string name="action_collapse_replies">Hide replies</string>
     <string name="action_like">Like</string>
     <string name="action_upvote">Upvote</string>
     <string name="action_downvote">Downvote</string>
@@ -71,7 +81,7 @@
     <string name="dialog_avatar_title">Choose an Avatar Style</string>
     <string name="dialog_post_title_hint">Post title</string>
     <string name="dialog_post_body_hint">Post body, optional</string>
-    <string name="dialog_reply_title">Reply to comment</string>
+    <string name="dialog_reply_to_hint">Reply @%1$s</string>
     <string name="dialog_reply_body_hint">Write a reply</string>
     <string name="compose_post_prompt">What do you want to share?</string>
     <string name="compose_reply_scope">Posting into the currently selected forum</string>
@@ -91,9 +101,10 @@
     <string name="toast_reply_coming_soon">Reply composition is still a demo placeholder.</string>
 
     <string name="notifications_title">Notifications</string>
-    <string name="notifications_subtitle">This tab is still reserved for future activity design.</string>
+    <string name="notifications_subtitle">Replies from your campus threads.</string>
     <string name="notifications_placeholder_title">Placeholder screen</string>
     <string name="notifications_placeholder_body">We have not designed the notification flow yet, but the shell is still here so the app structure feels complete.</string>
+    <string name="notification_comment_title">%1$s replied to you</string>
 
     <string name="you_title">You</string>
     <string name="you_subtitle">Profile editing, language, theme, and moderation access all live here now.</string>
@@ -117,6 +128,7 @@
     <string name="message_reported_by_you">Reported by you</string>
     <string name="message_author_line">%1$s • %2$s</string>
     <string name="message_image_attachment">Reply image attachment</string>
+    <string name="reply_to_user_format">Reply @%1$s: %2$s</string>
 
     <string name="comments_heading">Comments</string>
     <string name="comments_empty">No comments yet. This is a good post to reply to later.</string>
@@ -137,15 +149,15 @@
     <string name="post_not_found_summary">The selected post is no longer available.</string>
 
     <string-array name="avatar_option_labels">
-        <item>Soft Blue</item>
-        <item>Mist Blue</item>
-        <item>Soft Teal</item>
-        <item>Soft Green</item>
-        <item>Soft Yellow</item>
-        <item>Soft Orange</item>
-        <item>Peach</item>
-        <item>Soft Pink</item>
-        <item>Soft Magenta</item>
-        <item>Soft Purple</item>
+        <item>Sky</item>
+        <item>Harbor</item>
+        <item>Mint</item>
+        <item>Meadow</item>
+        <item>Sunrise</item>
+        <item>Apricot</item>
+        <item>Coral</item>
+        <item>Rose</item>
+        <item>Berry</item>
+        <item>Lavender</item>
     </string-array>
 </resources>

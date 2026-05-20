@@ -61,7 +61,7 @@ public final class UiPreferences {
     }
 
     public static void setAvatarIndex(Context context, int avatarIndex) {
-        prefs(context).edit().putInt(KEY_AVATAR_INDEX, avatarIndex).apply();
+        prefs(context).edit().putInt(KEY_AVATAR_INDEX, avatarIndex).commit();
     }
 
     public static int getAvatarColor(Context context) {

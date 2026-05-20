@@ -32,6 +32,11 @@
     <string name="feed_empty_body_generic">你可以在这个论坛先发布第一条帖子。</string>
     <string name="feed_empty_title_forum">%1$s 目前还是空的</string>
     <string name="feed_empty_body_forum">论坛切换已经接好了，但这个论坛暂时还没有灌入演示内容。</string>
+    <string name="search_channel_hint">搜索 %1$s 中的帖子</string>
+    <string name="search_empty_title">没有找到相关帖子</string>
+    <string name="search_empty_body">试试换个关键词</string>
+    <string name="search_ai_answer_title">AI 整理</string>
+    <string name="search_ai_answer_body">这个搜索看起来像在问 %1$s 里的一个问题。当前先做本地演示版：我会优先帮你筛出相关帖子，并建议先看课程代码匹配、点赞较高的回复和最相关的帖子详情。搜索：%2$s</string>
 
     <string name="settings_title">设置</string>
     <string name="settings_language">语言</string>
@@ -43,6 +48,8 @@
 
     <string name="action_save">保存</string>
     <string name="action_cancel">取消</string>
+    <string name="action_clear_search">清空搜索</string>
+    <string name="action_send">发送</string>
     <string name="action_back">返回</string>
     <string name="action_open_queue">打开队列</string>
     <string name="action_edit_nickname">编辑昵称</string>
@@ -55,7 +62,10 @@
     <string name="action_new_post">发帖</string>
     <string name="action_publish">发布</string>
     <string name="action_add_image">添加图片</string>
+    <string name="action_image_selected">已选择图片</string>
     <string name="action_save_image">保存图片</string>
+    <string name="action_expand_replies">展开 %1$d 条回复</string>
+    <string name="action_collapse_replies">收起回复</string>
     <string name="action_like">点赞</string>
     <string name="action_upvote">顶</string>
     <string name="action_downvote">踩</string>
@@ -71,7 +81,7 @@
     <string name="dialog_avatar_title">选择头像风格</string>
     <string name="dialog_post_title_hint">帖子标题</string>
     <string name="dialog_post_body_hint">主贴正文，可不填</string>
-    <string name="dialog_reply_title">回复评论</string>
+    <string name="dialog_reply_to_hint">回复 @%1$s</string>
     <string name="dialog_reply_body_hint">输入回复内容</string>
     <string name="compose_post_prompt">你想分享什么？</string>
     <string name="compose_reply_scope">将发到当前选中的论坛</string>
@@ -91,9 +101,10 @@
     <string name="toast_reply_coming_soon">回复输入框还只是演示占位。</string>
 
     <string name="notifications_title">通知</string>
-    <string name="notifications_subtitle">这个页面暂时仍然保留为未来的信息流入口。</string>
+    <string name="notifications_subtitle">来自校园帖子的回复提醒。</string>
     <string name="notifications_placeholder_title">通知页占位</string>
     <string name="notifications_placeholder_body">我们还没有把完整通知流程做出来，但先保留这个标签页，让整体应用结构更完整。</string>
+    <string name="notification_comment_title">%1$s 回复了你</string>
 
     <string name="you_title">我的</string>
     <string name="you_subtitle">个人资料、语言、主题，以及管理员切换入口都集中放在这里。</string>
@@ -117,6 +128,7 @@
     <string name="message_reported_by_you">你已举报</string>
     <string name="message_author_line">%1$s • %2$s</string>
     <string name="message_image_attachment">回复图片附件</string>
+    <string name="reply_to_user_format">回复 @%1$s：%2$s</string>
 
     <string name="comments_heading">评论区</string>
     <string name="comments_empty">暂时还没有评论，后续可以继续补充回复。</string>
@@ -137,15 +149,15 @@
     <string name="post_not_found_summary">当前选择的帖子已经不存在。</string>
 
     <string-array name="avatar_option_labels">
-        <item>浅蓝</item>
-        <item>雾蓝</item>
-        <item>浅青</item>
-        <item>浅绿</item>
-        <item>浅黄</item>
-        <item>浅橙</item>
+        <item>天空蓝</item>
+        <item>港湾蓝</item>
+        <item>薄荷青</item>
+        <item>草地绿</item>
+        <item>日出黄</item>
+        <item>杏子橙</item>
         <item>蜜桃</item>
-        <item>浅粉</item>
-        <item>浅玫红</item>
-        <item>浅紫</item>
+        <item>玫瑰粉</item>
+        <item>莓果红</item>
+        <item>薰衣草紫</item>
     </string-array>
 </resources>

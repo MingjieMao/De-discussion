@@ -1,14 +1,20 @@
 package com.example.myapplication;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +32,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import dao.model.Message;
@@ -59,6 +67,9 @@ public class PostViewerActivity extends AppCompatActivity {
     private UUID pendingScrollMessageId;
     private Uri selectedReplyImageUri;
     private ImageView activeReplyImagePreview;
+    private View activeReplyImagePreviewContainer;
+    private TextView activeReplySendButton;
+    private final Set<UUID> expandedTopLevelComments = new HashSet<>();
 
     private final ActivityResultLauncher<String> pickReplyImageLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -73,7 +84,12 @@ public class PostViewerActivity extends AppCompatActivity {
                 }
                 if (activeReplyImagePreview != null) {
                     activeReplyImagePreview.setImageURI(selectedReplyImageUri);
-                    activeReplyImagePreview.setVisibility(View.VISIBLE);
+                }
+                if (activeReplyImagePreviewContainer != null) {
+                    activeReplyImagePreviewContainer.setVisibility(View.VISIBLE);
+                }
+                if (activeReplySendButton != null) {
+                    updateReplySendState(activeReplySendButton, null);
                 }
             });
 
@@ -193,16 +209,24 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerState.setText(rootState);
         textPostViewerState.setVisibility(rootState.isEmpty() ? View.GONE : View.VISIBLE);
 
-        ArrayList<Message> messages = AppData.getMessages(post);
+        ArrayList<Message> messages = AppData.getMessages(post, expandedTopLevelComments);
         textCommentsEmpty.setVisibility(messages.isEmpty() ? View.VISIBLE : View.GONE);
 
-        MessageAdapter adapter = new MessageAdapter(messages);
+        MessageAdapter adapter = new MessageAdapter(messages, expandedTopLevelComments);
         adapter.setOnMessageActionListener(this::handleMessageAction);
         adapter.setOnMessageVoteListener((message, direction) -> {
             AppData.toggleMessageVote(message, direction);
             refreshUi();
         });
         adapter.setOnMessageReplyListener(this::showReplyDialog);
+        adapter.setOnReplyThreadToggleListener(topLevelCommentId -> {
+            if (expandedTopLevelComments.contains(topLevelCommentId)) {
+                expandedTopLevelComments.remove(topLevelCommentId);
+            } else {
+                expandedTopLevelComments.add(topLevelCommentId);
+            }
+            refreshUi();
+        });
         recyclerMessages.setAdapter(adapter);
         scrollToPendingReply(messages);
     }
@@ -282,60 +306,148 @@ public class PostViewerActivity extends AppCompatActivity {
         input.setSingleLine(false);
         input.setMinLines(2);
         input.setMaxLines(4);
-        input.setHint(R.string.dialog_reply_body_hint);
-        int horizontal = dp(16);
-        int vertical = dp(12);
-        input.setPadding(horizontal, vertical, horizontal, vertical);
+        input.setHint(getString(R.string.dialog_reply_to_hint, AppData.getUsername(parent.poster())));
+        input.setBackgroundResource(R.drawable.bg_reply_input);
+        input.setPadding(dp(18), dp(14), dp(18), dp(14));
 
         LinearLayout dialogContent = new LinearLayout(this);
         dialogContent.setOrientation(LinearLayout.VERTICAL);
-        int dialogSpacing = dp(12);
-        dialogContent.setPadding(0, dialogSpacing, 0, 0);
+        dialogContent.setBackgroundResource(R.drawable.bg_reply_dialog);
+        dialogContent.setPadding(dp(14), dp(14), dp(14), dp(12));
         dialogContent.addView(input, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                dp(92)
         ));
 
-        Button buttonAttachImage = new Button(this);
-        buttonAttachImage.setText(R.string.action_add_image);
-        buttonAttachImage.setAllCaps(false);
-        buttonAttachImage.setOnClickListener(v -> pickReplyImageLauncher.launch("image/*"));
-        LinearLayout.LayoutParams attachParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        attachParams.topMargin = dialogSpacing;
-        dialogContent.addView(buttonAttachImage, attachParams);
-
+        FrameLayout previewContainer = new FrameLayout(this);
+        previewContainer.setVisibility(View.GONE);
         ImageView imagePreview = new ImageView(this);
         imagePreview.setAdjustViewBounds(true);
         imagePreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        imagePreview.setVisibility(View.GONE);
+        imagePreview.setBackgroundResource(R.drawable.bg_card);
+        previewContainer.addView(imagePreview, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+
+        ImageButton buttonRemoveImage = new ImageButton(this);
+        buttonRemoveImage.setBackgroundResource(R.drawable.bg_preview_remove);
+        buttonRemoveImage.setImageResource(R.drawable.ic_close_24);
+        buttonRemoveImage.setColorFilter(ContextCompat.getColor(this, R.color.ink_primary));
+        buttonRemoveImage.setPadding(dp(6), dp(6), dp(6), dp(6));
+        buttonRemoveImage.setOnClickListener(v -> {
+            selectedReplyImageUri = null;
+            imagePreview.setImageDrawable(null);
+            previewContainer.setVisibility(View.GONE);
+            if (activeReplySendButton != null) {
+                updateReplySendState(activeReplySendButton, input);
+            }
+        });
+        FrameLayout.LayoutParams removeParams = new FrameLayout.LayoutParams(dp(32), dp(32));
+        removeParams.gravity = android.view.Gravity.TOP | android.view.Gravity.END;
+        removeParams.setMargins(0, dp(8), dp(8), 0);
+        previewContainer.addView(buttonRemoveImage, removeParams);
+
         LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(180)
+                dp(150)
         );
-        imageParams.topMargin = dp(8);
-        dialogContent.addView(imagePreview, imageParams);
+        imageParams.topMargin = dp(10);
+        dialogContent.addView(previewContainer, imageParams);
         activeReplyImagePreview = imagePreview;
+        activeReplyImagePreviewContainer = previewContainer;
+
+        LinearLayout toolsRow = new LinearLayout(this);
+        toolsRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        toolsRow.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams toolsParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(48)
+        );
+        toolsParams.topMargin = dp(8);
+        dialogContent.addView(toolsRow, toolsParams);
+
+        ImageButton buttonAttachImage = createReplyToolButton(R.drawable.ic_image_24, R.string.action_add_image);
+        buttonAttachImage.setOnClickListener(v -> pickReplyImageLauncher.launch("image/*"));
+        toolsRow.addView(buttonAttachImage);
+
+        Space toolsSpacer = new Space(this);
+        toolsRow.addView(toolsSpacer, new LinearLayout.LayoutParams(0, 1, 1));
+
+        TextView buttonSend = new TextView(this);
+        buttonSend.setGravity(android.view.Gravity.CENTER);
+        buttonSend.setMinWidth(dp(64));
+        buttonSend.setPadding(dp(16), 0, dp(16), 0);
+        buttonSend.setText(R.string.action_send);
+        buttonSend.setTextSize(14);
+        buttonSend.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        buttonSend.setBackgroundResource(R.drawable.bg_reply_send);
+        buttonSend.setOnClickListener(v -> {
+            if (buttonSend.isEnabled()) {
+                publishReply(input, parent, (androidx.appcompat.app.AlertDialog) buttonSend.getTag());
+            }
+        });
+        toolsRow.addView(buttonSend, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                dp(40)
+        ));
+        activeReplySendButton = buttonSend;
+        input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateReplySendState(buttonSend, input);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+        updateReplySendState(buttonSend, input);
 
         androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.dialog_reply_title)
                 .setView(dialogContent)
-                .setNegativeButton(R.string.action_cancel, null)
-                .setPositiveButton(R.string.action_reply, null)
                 .create();
 
-        dialog.setOnShowListener(unused -> {
-            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
-                    .setOnClickListener(v -> publishReply(input, parent, dialog));
-        });
+        dialog.setOnShowListener(unused -> buttonSend.setTag(dialog));
         dialog.setOnDismissListener(unused -> {
             activeReplyImagePreview = null;
+            activeReplyImagePreviewContainer = null;
+            activeReplySendButton = null;
             selectedReplyImageUri = null;
         });
         dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
         input.requestFocus();
+    }
+
+    private ImageButton createReplyToolButton(int iconResId, int contentDescriptionResId) {
+        ImageButton button = new ImageButton(this);
+        button.setBackgroundResource(R.drawable.bg_reply_tool);
+        button.setContentDescription(getString(contentDescriptionResId));
+        button.setImageResource(iconResId);
+        button.setColorFilter(ContextCompat.getColor(this, R.color.ink_primary));
+        button.setPadding(dp(5), dp(5), dp(5), dp(5));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(48), dp(48));
+        params.setMarginEnd(dp(8));
+        button.setLayoutParams(params);
+        return button;
+    }
+
+    private void updateReplySendState(TextView buttonSend, EditText input) {
+        boolean hasText = input != null && !input.getText().toString().trim().isEmpty();
+        boolean enabled = hasText || selectedReplyImageUri != null;
+        buttonSend.setEnabled(enabled);
+        buttonSend.setAlpha(enabled ? 1.0f : 0.5f);
+        buttonSend.setTextColor(ContextCompat.getColor(
+                this,
+                enabled ? R.color.accent_strong : R.color.ink_tertiary
+        ));
     }
 
     private void publishReply(EditText input, Message parent, androidx.appcompat.app.AlertDialog dialog) {

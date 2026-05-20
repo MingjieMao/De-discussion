@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +39,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false);
+        view.setBackgroundColor(Color.TRANSPARENT);
+        view.setForeground(null);
+        view.setSelected(false);
+        view.setPressed(false);
         return new ViewHolder(view);
     }
 
@@ -45,6 +50,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Post post = posts.get(position);
         holder.display(post);
+        holder.itemView.setSelected(false);
+        holder.itemView.setPressed(false);
         holder.itemView.setOnClickListener(v -> openPost(post));
         holder.buttonPostComments.setOnClickListener(v -> openPost(post));
         holder.buttonPostUpvote.setOnClickListener(v -> vote(holder, post, 1));

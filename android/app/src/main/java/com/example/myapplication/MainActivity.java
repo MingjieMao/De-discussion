@@ -2,8 +2,11 @@ package com.example.myapplication;
 
 import android.content.res.ColorStateList;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -13,6 +16,7 @@ import android.view.animation.PathInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -166,16 +170,79 @@ public class MainActivity extends AppCompatActivity {
         String[] labels = getResources().getStringArray(R.array.avatar_option_labels);
         int selected = UiPreferences.getAvatarIndex(this);
 
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.dialog_avatar_title)
-                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
-                    UiPreferences.setAvatarIndex(this, which);
-                    notifyPagesChanged();
-                    Toast.makeText(this, getString(R.string.toast_profile_saved), Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                })
-                .setNegativeButton(R.string.action_cancel, null)
-                .show();
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setBackgroundResource(R.drawable.bg_avatar_picker_dialog);
+        content.setPadding(dp(20), dp(18), dp(20), dp(14));
+
+        TextView title = new TextView(this);
+        title.setText(R.string.dialog_avatar_title);
+        title.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        title.setTextSize(20);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        titleParams.setMargins(0, 0, 0, dp(10));
+        content.addView(title, titleParams);
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setView(content)
+                .create();
+
+        for (int i = 0; i < UiPreferences.getGoogleColorCount(); i++) {
+            int index = i;
+            LinearLayout row = new LinearLayout(this);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(dp(8), dp(8), dp(8), dp(8));
+            row.setClickable(true);
+            row.setFocusable(true);
+
+            TextView swatch = new TextView(this);
+            swatch.setGravity(android.view.Gravity.CENTER);
+            swatch.setText(index == selected ? "✓" : "");
+            swatch.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+            swatch.setTypeface(Typeface.DEFAULT_BOLD);
+            GradientDrawable swatchBg = new GradientDrawable();
+            swatchBg.setShape(GradientDrawable.OVAL);
+            swatchBg.setColor(UiPreferences.getGoogleColor(index));
+            swatchBg.setStroke(dp(index == selected ? 3 : 1), ContextCompat.getColor(this,
+                    index == selected ? R.color.accent_strong : R.color.surface_border));
+            swatch.setBackground(swatchBg);
+            row.addView(swatch, new LinearLayout.LayoutParams(dp(34), dp(34)));
+
+            TextView label = new TextView(this);
+            label.setText(labels[index]);
+            label.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+            label.setTextSize(16);
+            LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1
+            );
+            labelParams.setMarginStart(dp(12));
+            row.addView(label, labelParams);
+
+            row.setOnClickListener(v -> {
+                UiPreferences.setAvatarIndex(this, index);
+                notifyPagesChanged();
+                Toast.makeText(this, getString(R.string.toast_profile_saved), Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+                recreate();
+            });
+
+            content.addView(row, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            ));
+        }
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
 
     public void showNicknameDialog() {

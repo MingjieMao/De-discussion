@@ -2,13 +2,11 @@ package com.example.myapplication;
 
 import android.net.Uri;
 import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,17 +14,26 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import dao.model.Message;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
     private final List<Message> messages;
+    private final Set<UUID> expandedTopLevelComments;
     private OnMessageActionListener onMessageActionListener;
     private OnMessageVoteListener onMessageVoteListener;
     private OnMessageReplyListener onMessageReplyListener;
+    private OnReplyThreadToggleListener onReplyThreadToggleListener;
 
     public MessageAdapter(List<Message> messages) {
+        this(messages, java.util.Collections.emptySet());
+    }
+
+    public MessageAdapter(List<Message> messages, Set<UUID> expandedTopLevelComments) {
         this.messages = messages;
+        this.expandedTopLevelComments = expandedTopLevelComments;
     }
 
     public void setOnMessageActionListener(OnMessageActionListener onMessageActionListener) {
@@ -41,6 +48,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         this.onMessageReplyListener = onMessageReplyListener;
     }
 
+    public void setOnReplyThreadToggleListener(OnReplyThreadToggleListener onReplyThreadToggleListener) {
+        this.onReplyThreadToggleListener = onReplyThreadToggleListener;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -52,7 +63,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Message message = messages.get(position);
-        holder.display(message, shouldShowTopSeparator(message, position));
+        UUID topLevelId = AppData.getTopLevelCommentId(message);
+        boolean expanded = topLevelId != null && expandedTopLevelComments.contains(topLevelId);
+        boolean showReplyToggle = shouldShowReplyToggle(message, position, topLevelId);
+        holder.display(message, shouldShowTopSeparator(message, position), showReplyToggle, expanded);
         holder.buttonMessageUpvote.setOnClickListener(v -> vote(holder, message, 1));
         holder.buttonMessageDownvote.setOnClickListener(v -> vote(holder, message, -1));
         holder.buttonMessageReply.setOnClickListener(v -> {
@@ -65,6 +79,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 onMessageActionListener.onPrimaryAction(message);
             }
         });
+        holder.textMessageReplyToggle.setOnClickListener(v -> {
+            if (onReplyThreadToggleListener != null && topLevelId != null) {
+                onReplyThreadToggleListener.onToggle(topLevelId);
+            }
+        });
     }
 
     @Override
@@ -73,7 +92,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     }
 
     private boolean shouldShowTopSeparator(Message message, int position) {
-        return position > 0 && AppData.getCommentDepth(message) == 0;
+        return false;
+    }
+
+    private boolean shouldShowReplyToggle(Message message, int position, UUID topLevelId) {
+        if (topLevelId == null || AppData.getTopLevelReplyCount(message) <= 1) {
+            return false;
+        }
+        if (AppData.getDisplayCommentDepth(message) == 0) {
+            return false;
+        }
+        if (position == messages.size() - 1) {
+            return true;
+        }
+        UUID nextTopLevelId = AppData.getTopLevelCommentId(messages.get(position + 1));
+        return !topLevelId.equals(nextTopLevelId);
     }
 
     public interface OnMessageActionListener {
@@ -88,10 +121,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         void onReply(Message message);
     }
 
+    public interface OnReplyThreadToggleListener {
+        void onToggle(UUID topLevelCommentId);
+    }
+
     private void vote(ViewHolder holder, Message message, int direction) {
         if (onMessageVoteListener != null) {
             onMessageVoteListener.onVote(message, direction);
-            holder.display(message, holder.viewMessageTopSeparator.getVisibility() == View.VISIBLE);
+            UUID topLevelId = AppData.getTopLevelCommentId(message);
+            boolean expanded = topLevelId != null && expandedTopLevelComments.contains(topLevelId);
+            holder.display(
+                    message,
+                    holder.viewMessageTopSeparator.getVisibility() == View.VISIBLE,
+                    holder.textMessageReplyToggle.getVisibility() == View.VISIBLE,
+                    expanded
+            );
             animateVote(direction > 0 ? holder.buttonMessageUpvote : holder.buttonMessageDownvote);
         }
     }
@@ -114,10 +158,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final View messageRoot;
+        private final View layoutMessageRow;
         private final View viewMessageTopSeparator;
-        private final LinearLayout layoutMessageDepthRails;
         private final TextView textMessageAvatar;
-        private final View viewMessageThreadLine;
         private final TextView textMessageAuthor;
         private final TextView textMessageTimestamp;
         private final TextView textMessageState;
@@ -125,6 +168,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         private final ImageView imageMessageAttachment;
         private final TextView textMessageScore;
         private final TextView textMessageReplyCount;
+        private final TextView textMessageReplyToggle;
         private final ImageView imageMessageReplyIcon;
         private final ImageButton buttonMessageUpvote;
         private final ImageButton buttonMessageDownvote;
@@ -134,10 +178,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         ViewHolder(View view) {
             super(view);
             messageRoot = view.findViewById(R.id.messageRoot);
+            layoutMessageRow = view.findViewById(R.id.layoutMessageRow);
             viewMessageTopSeparator = view.findViewById(R.id.viewMessageTopSeparator);
-            layoutMessageDepthRails = view.findViewById(R.id.layoutMessageDepthRails);
             textMessageAvatar = view.findViewById(R.id.textMessageAvatar);
-            viewMessageThreadLine = view.findViewById(R.id.viewMessageThreadLine);
             textMessageAuthor = view.findViewById(R.id.textMessageAuthor);
             textMessageTimestamp = view.findViewById(R.id.textMessageTimestamp);
             textMessageState = view.findViewById(R.id.textMessageState);
@@ -145,6 +188,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             imageMessageAttachment = view.findViewById(R.id.imageMessageAttachment);
             textMessageScore = view.findViewById(R.id.textMessageScore);
             textMessageReplyCount = view.findViewById(R.id.textMessageReplyCount);
+            textMessageReplyToggle = view.findViewById(R.id.textMessageReplyToggle);
             imageMessageReplyIcon = view.findViewById(R.id.imageMessageReplyIcon);
             buttonMessageUpvote = view.findViewById(R.id.buttonMessageUpvote);
             buttonMessageDownvote = view.findViewById(R.id.buttonMessageDownvote);
@@ -152,29 +196,35 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             buttonMessageMenu = view.findViewById(R.id.buttonMessageMenu);
         }
 
-        void display(Message message, boolean showTopSeparator) {
+        void display(Message message, boolean showTopSeparator, boolean showReplyToggle, boolean expanded) {
             int upvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.vote_up);
             int neutralColor = ContextCompat.getColor(itemView.getContext(), R.color.ink_secondary);
             int downvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.vote_down);
             int primaryColor = ContextCompat.getColor(itemView.getContext(), R.color.ink_primary);
             int reportColor = ContextCompat.getColor(itemView.getContext(), R.color.danger_ink);
 
-            int depth = AppData.getCommentDepth(message);
+            int depth = AppData.getDisplayCommentDepth(message);
             viewMessageTopSeparator.setVisibility(showTopSeparator ? View.VISIBLE : View.GONE);
-            messageRoot.setPaddingRelative(0, messageRoot.getPaddingTop(), messageRoot.getPaddingEnd(), messageRoot.getPaddingBottom());
-            bindDepthRails(depth);
+            int indent = Math.round(depth * 40 * itemView.getResources().getDisplayMetrics().density);
+            layoutMessageRow.setPaddingRelative(indent, layoutMessageRow.getPaddingTop(), layoutMessageRow.getPaddingEnd(), layoutMessageRow.getPaddingBottom());
 
             textMessageAvatar.setText(AppData.getAvatarLetter(message.poster()));
+            int avatarSize = Math.round((depth > 0 ? 24 : 32) * itemView.getResources().getDisplayMetrics().density);
+            ViewGroup.LayoutParams avatarParams = textMessageAvatar.getLayoutParams();
+            avatarParams.width = avatarSize;
+            avatarParams.height = avatarSize;
+            textMessageAvatar.setLayoutParams(avatarParams);
+            textMessageAvatar.setTextSize(depth > 0 ? 11 : 14);
             GradientDrawable avatarBackground = (GradientDrawable) ContextCompat.getDrawable(itemView.getContext(), R.drawable.bg_avatar_circle).mutate();
-            avatarBackground.setColor(AppData.getAvatarColor(message.poster()));
+            avatarBackground.setColor(AppData.getAvatarColor(itemView.getContext(), message.poster()));
             textMessageAvatar.setBackground(avatarBackground);
 
-            textMessageAuthor.setText(AppData.getUsername(message.poster()));
+            textMessageAuthor.setText(AppData.getMessageAuthorDisplayName(message));
             textMessageTimestamp.setText(AppData.formatTimestamp(message.timestamp()));
             String status = AppData.getMessageStatus(itemView.getContext(), message);
             textMessageState.setText(status);
             textMessageState.setVisibility(status.isEmpty() ? View.GONE : View.VISIBLE);
-            String content = message.message();
+            String content = AppData.getMessageDisplayContent(itemView.getContext(), message);
             textMessageContent.setText(content);
             textMessageContent.setVisibility(content == null || content.isEmpty() ? View.GONE : View.VISIBLE);
             String imageUri = AppData.getMessageImageUri(message);
@@ -190,8 +240,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 imageMessageAttachment.setVisibility(View.VISIBLE);
             }
             textMessageScore.setText(String.valueOf(AppData.getMessageVoteScore(message)));
-            textMessageReplyCount.setText(String.valueOf(AppData.getMessageReplyCount(message)));
-            viewMessageThreadLine.setVisibility(depth > 0 ? View.VISIBLE : View.GONE);
+            int replyCount = AppData.getMessageReplyCount(message);
+            textMessageReplyCount.setText(String.valueOf(replyCount));
+            if (showReplyToggle) {
+                if (expanded) {
+                    textMessageReplyToggle.setText(R.string.action_collapse_replies);
+                } else {
+                    int hiddenReplies = Math.max(1, AppData.getTopLevelReplyCount(message) - 1);
+                    textMessageReplyToggle.setText(itemView.getContext().getString(R.string.action_expand_replies, hiddenReplies));
+                }
+                textMessageReplyToggle.setVisibility(View.VISIBLE);
+            } else {
+                textMessageReplyToggle.setVisibility(View.GONE);
+            }
 
             int voteDirection = AppData.getCurrentUserMessageVote(message);
             buttonMessageUpvote.setImageResource(voteDirection > 0
@@ -212,28 +273,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             textMessageScore.setTextColor(voteDirection > 0
                     ? upvoteColor
                     : voteDirection < 0 ? downvoteColor : primaryColor);
-        }
-
-        private void bindDepthRails(int depth) {
-            layoutMessageDepthRails.removeAllViews();
-            layoutMessageDepthRails.setVisibility(depth > 0 ? View.VISIBLE : View.GONE);
-            if (depth <= 0) {
-                return;
-            }
-
-            float density = itemView.getResources().getDisplayMetrics().density;
-            int railWidth = Math.round(18 * density);
-            int lineWidth = Math.max(1, Math.round(2 * density));
-            int lineColor = ContextCompat.getColor(itemView.getContext(), R.color.surface_border);
-            for (int i = 0; i < depth; i++) {
-                LinearLayout rail = new LinearLayout(itemView.getContext());
-                rail.setGravity(android.view.Gravity.CENTER);
-                layoutMessageDepthRails.addView(rail, new LinearLayout.LayoutParams(railWidth, ViewGroup.LayoutParams.MATCH_PARENT));
-
-                View line = new View(itemView.getContext());
-                line.setBackgroundColor(lineColor);
-                rail.addView(line, new LinearLayout.LayoutParams(lineWidth, ViewGroup.LayoutParams.MATCH_PARENT));
-            }
         }
 
     }

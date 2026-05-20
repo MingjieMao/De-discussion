@@ -60,6 +60,11 @@ public final class AppData {
     private static User lateCoder;
     private static User uxPilot;
     private static User treeSage;
+    private static User compSurvivor;
+    private static User anuSleepDeprived;
+    private static User labPartner;
+    private static User quacEnjoyer;
+    private static User deadlineVictim;
 
     private static Message hiddenExampleMessage;
     private static Message queueExampleMessage;
@@ -111,6 +116,11 @@ public final class AppData {
         if (FORUM_ORDER.contains(forumKey)) {
             selectedForumKey = forumKey;
         }
+    }
+
+    public static String getSelectedForumKey() {
+        ensurePopulated();
+        return selectedForumKey;
     }
 
     public static boolean isSelectedForum(String forumKey) {
@@ -198,6 +208,22 @@ public final class AppData {
         return posts;
     }
 
+    public static ArrayList<Post> searchPosts(Context context, String query) {
+        ArrayList<Post> posts = getPosts();
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase();
+        if (normalizedQuery.isEmpty()) {
+            return posts;
+        }
+
+        ArrayList<Post> filtered = new ArrayList<>();
+        for (Post post : posts) {
+            if (matchesPostSearch(context, post, normalizedQuery)) {
+                filtered.add(post);
+            }
+        }
+        return filtered;
+    }
+
     public static Post getPostById(String postId) {
         ensurePopulated();
         if (postId == null) {
@@ -225,6 +251,10 @@ public final class AppData {
     }
 
     public static ArrayList<Message> getMessages(Post post) {
+        return getMessages(post, Collections.emptySet());
+    }
+
+    public static ArrayList<Message> getMessages(Post post, Set<UUID> expandedTopLevelCommentIds) {
         ensurePopulated();
         ArrayList<Message> messages = new ArrayList<>();
         if (post == null) {
@@ -262,7 +292,9 @@ public final class AppData {
         }
 
         for (Message message : topLevel) {
-            appendThread(message, groupedReplies, messages);
+            appendXhsThread(message, groupedReplies, messages, expandedTopLevelCommentIds == null
+                    ? Collections.emptySet()
+                    : expandedTopLevelCommentIds);
         }
         return messages;
     }
@@ -367,7 +399,18 @@ public final class AppData {
     }
 
     public static int getVisibleMessageCount(Post post) {
-        return getMessages(post).size();
+        if (post == null) {
+            return 0;
+        }
+        int count = 0;
+        Iterator<Message> iterator = (adminMode ? post.messages : post.getVisibleMessages(false)).getAll();
+        while (iterator.hasNext()) {
+            Message message = iterator.next();
+            if (!isRootMessage(message)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public static int getCommentDepth(Message message) {
@@ -383,6 +426,61 @@ public final class AppData {
             parentId = meta == null ? null : meta.parentId;
         }
         return depth;
+    }
+
+    public static int getDisplayCommentDepth(Message message) {
+        return isTopLevelComment(message) ? 0 : 1;
+    }
+
+    public static String getMessageDisplayContent(Context context, Message message) {
+        if (message == null) {
+            return "";
+        }
+        return message.message();
+    }
+
+    public static String getMessageAuthorDisplayName(Message message) {
+        if (message == null) {
+            return "";
+        }
+        String author = getUsername(message.poster());
+        if (getCommentDepth(message) <= 1) {
+            return author;
+        }
+        Message parent = getParentMessage(message);
+        if (parent == null) {
+            return author;
+        }
+        return author + "  ▸  " + getUsername(parent.poster());
+    }
+
+    public static boolean isTopLevelComment(Message message) {
+        if (message == null || isRootMessage(message)) {
+            return false;
+        }
+        UUID rootId = getRootMessageId(getPostForMessage(message));
+        UUID parentId = getParentId(message);
+        return parentId == null || parentId.equals(rootId);
+    }
+
+    public static UUID getTopLevelCommentId(Message message) {
+        Message topLevel = getTopLevelComment(message);
+        return topLevel == null ? null : topLevel.id();
+    }
+
+    public static int getTopLevelReplyCount(Message message) {
+        Message topLevel = getTopLevelComment(message);
+        if (topLevel == null) {
+            return 0;
+        }
+        Post post = getPostForMessage(topLevel);
+        if (post == null) {
+            return 0;
+        }
+        Map<UUID, ArrayList<Message>> groupedReplies = buildVisibleReplyGroups(post);
+        ArrayList<Message> replies = new ArrayList<>();
+        appendFlatReplies(topLevel, groupedReplies, replies);
+        return replies.size();
     }
 
     public static int getMessageReplyCount(Message parent) {
@@ -407,6 +505,50 @@ public final class AppData {
             }
         }
         return count;
+    }
+
+    public static ArrayList<AppNotification> getNotifications(Context context) {
+        ensurePopulated();
+        ArrayList<AppNotification> notifications = new ArrayList<>();
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return notifications;
+        }
+
+        Iterator<Post> postIterator = PostDAO.getInstance().getAll();
+        while (postIterator.hasNext()) {
+            Post post = postIterator.next();
+            Message root = getRootMessage(post);
+            if (root == null) {
+                continue;
+            }
+
+            ArrayList<Message> messages = collectMessages(adminMode
+                    ? post.messages.getAll()
+                    : post.getVisibleMessages(false).getAll());
+            for (Message message : messages) {
+                if (isRootMessage(message)) {
+                    continue;
+                }
+
+                Message parent = getParentMessage(message);
+                if (parent != null && parent.poster().equals(currentUser.id())) {
+                    notifications.add(new AppNotification(
+                            NotificationType.COMMENT,
+                            message.poster(),
+                            post.id,
+                            message.id(),
+                            context.getString(R.string.notification_comment_title, getUsername(message.poster())),
+                            message.message(),
+                            message.timestamp()
+                    ));
+                }
+
+            }
+        }
+
+        notifications.sort(Comparator.comparingLong(AppNotification::timestamp).reversed());
+        return notifications;
     }
 
     public static int getReportCount(Message message) {
@@ -657,6 +799,14 @@ public final class AppData {
         return UiPreferences.getGoogleColor(index);
     }
 
+    public static int getAvatarColor(Context context, UUID userId) {
+        User currentUser = getCurrentUser();
+        if (context != null && currentUser != null && currentUser.id().equals(userId)) {
+            return UiPreferences.getAvatarColor(context);
+        }
+        return getAvatarColor(userId);
+    }
+
     private static User getCurrentUser() {
         return adminMode ? adminViewer : memberViewer;
     }
@@ -668,11 +818,87 @@ public final class AppData {
         lateCoder = addUser("latecoder", User.Role.Member);
         uxPilot = addUser("uxpilot", User.Role.Member);
         treeSage = addUser("treesage", User.Role.Member);
+        compSurvivor = addUser("comp_survivor", User.Role.Member);
+        anuSleepDeprived = addUser("anu_sleep_deprived", User.Role.Member);
+        labPartner = addUser("lab_partner", User.Role.Member);
+        quacEnjoyer = addUser("quac_enjoyer", User.Role.Member);
+        deadlineVictim = addUser("deadline_victim", User.Role.Member);
     }
 
     private static void seedForumThreads() {
         long now = System.currentTimeMillis();
         boolean zh = contextLanguageIsChinese();
+
+        Post comp2300Post = createForumPost(
+                FORUM_ANU,
+                compSurvivor,
+                zh ? "COMP2300 真的快把我摧毁了" : "COMP2300 is actually destroying me",
+                zh
+                        ? "我知道计算机组成会很难，但 COMP2300 感觉像一份全职工作。每次 lab 开始我都以为自己理解电路，最后都会开始怀疑自己到底懂不懂二进制。QuAC CPU 确实很酷，但凌晨两点调 Digital 是另一种痛苦。"
+                        : "I knew computer organisation would be hard, but COMP2300 feels like a full-time job. Every lab starts with me thinking I understand the circuit, and ends with me questioning whether I understand binary at all. The QuAC CPU is cool, but debugging Digital at 2am is a different kind of pain.",
+                now - minutes(18),
+                37
+        );
+        Message comp2300Comment = addComment(
+                comp2300Post,
+                anuSleepDeprived,
+                null,
+                now - minutes(15),
+                zh
+                        ? "同感。Digital 里一个小小接线错误都像是在针对我本人。"
+                        : "Same. Digital makes one tiny wiring mistake feel like a personal attack.",
+                12
+        );
+        Message comp2300SecondReply = addComment(
+                comp2300Post,
+                labPartner,
+                comp2300Comment,
+                now - minutes(13),
+                zh
+                        ? "PC 不更新的那一刻，我的灵魂直接离开身体。"
+                        : "The moment the PC stops updating, my soul leaves my body.",
+                6
+        );
+        addComment(
+                comp2300Post,
+                lateCoder,
+                comp2300SecondReply,
+                now - minutes(12),
+                zh
+                        ? "我发誓一半 lab 时间都在找我到底忘了连哪根线。"
+                        : "I swear half the lab is just learning which wire I forgot to connect.",
+                4
+        );
+        addComment(
+                comp2300Post,
+                quacEnjoyer,
+                null,
+                now - minutes(11),
+                zh
+                        ? "但说实话，datapath 一旦想通，确实还挺爽的。"
+                        : "Lowkey though, once the datapath clicks, it is actually kind of satisfying.",
+                9
+        );
+        addComment(
+                comp2300Post,
+                deadlineVictim,
+                null,
+                now - minutes(9),
+                zh
+                        ? "最难的是假装自己没有花三个小时调一个 mux。"
+                        : "The hardest part is pretending I did not spend three hours debugging a single mux.",
+                15
+        );
+        addComment(
+                comp2300Post,
+                quacEnjoyer,
+                null,
+                now - minutes(8),
+                zh
+                        ? "你昨天说的那个 datapath 图救了我一命。"
+                        : "Your datapath sketch from yesterday saved me.",
+                5
+        );
 
         Post layoutPost = createForumPost(
                 FORUM_ANU,
@@ -1117,6 +1343,125 @@ public final class AppData {
         }
     }
 
+    private static void appendXhsThread(
+            Message topLevelMessage,
+            Map<UUID, ArrayList<Message>> groupedReplies,
+            ArrayList<Message> orderedMessages,
+            Set<UUID> expandedTopLevelCommentIds
+    ) {
+        orderedMessages.add(topLevelMessage);
+        ArrayList<Message> replies = new ArrayList<>();
+        appendFlatReplies(topLevelMessage, groupedReplies, replies);
+        int visibleReplyCount = expandedTopLevelCommentIds.contains(topLevelMessage.id())
+                ? replies.size()
+                : Math.min(1, replies.size());
+        for (int i = 0; i < visibleReplyCount; i++) {
+            orderedMessages.add(replies.get(i));
+        }
+    }
+
+    private static void appendFlatReplies(
+            Message parent,
+            Map<UUID, ArrayList<Message>> groupedReplies,
+            ArrayList<Message> replies
+    ) {
+        ArrayList<Message> children = groupedReplies.get(parent.id());
+        if (children == null) {
+            return;
+        }
+        for (Message child : children) {
+            replies.add(child);
+            appendFlatReplies(child, groupedReplies, replies);
+        }
+    }
+
+    private static Map<UUID, ArrayList<Message>> buildVisibleReplyGroups(Post post) {
+        Map<UUID, ArrayList<Message>> groupedReplies = new HashMap<>();
+        if (post == null) {
+            return groupedReplies;
+        }
+
+        ArrayList<Message> visibleMessages = collectMessages(adminMode
+                ? post.messages.getAll()
+                : post.getVisibleMessages(false).getAll());
+        Set<UUID> visibleIds = new HashSet<>();
+        for (Message message : visibleMessages) {
+            visibleIds.add(message.id());
+        }
+        UUID rootId = getRootMessageId(post);
+        for (Message message : visibleMessages) {
+            if (isRootMessage(message)) {
+                continue;
+            }
+            UUID parentId = getParentId(message);
+            if (parentId == null || parentId.equals(rootId) || !visibleIds.contains(parentId)) {
+                continue;
+            }
+            groupedReplies.computeIfAbsent(parentId, unused -> new ArrayList<>()).add(message);
+        }
+        for (ArrayList<Message> children : groupedReplies.values()) {
+            sortMessagesByTimestamp(children);
+        }
+        return groupedReplies;
+    }
+
+    private static Message getTopLevelComment(Message message) {
+        if (message == null || isRootMessage(message)) {
+            return null;
+        }
+        Post post = getPostForMessage(message);
+        UUID rootId = getRootMessageId(post);
+        Message current = message;
+        UUID parentId = getParentId(current);
+        while (parentId != null && !parentId.equals(rootId)) {
+            Message parent = findMessage(post, parentId);
+            if (parent == null) {
+                break;
+            }
+            current = parent;
+            parentId = getParentId(current);
+        }
+        return current;
+    }
+
+    private static Message getParentMessage(Message message) {
+        if (message == null) {
+            return null;
+        }
+        Post post = getPostForMessage(message);
+        return findMessage(post, getParentId(message));
+    }
+
+    private static String getStringForNotification(Context context, int resId, Object... args) {
+        return context.getString(resId, args);
+    }
+
+    private static boolean matchesPostSearch(Context context, Post post, String normalizedQuery) {
+        if (post == null) {
+            return false;
+        }
+        if (containsIgnoreCase(post.topic, normalizedQuery)
+                || containsIgnoreCase(getPostBody(post), normalizedQuery)
+                || containsIgnoreCase(getUsername(post.poster), normalizedQuery)
+                || containsIgnoreCase(getPostCommunityLabel(context, post), normalizedQuery)) {
+            return true;
+        }
+
+        ArrayList<Message> visibleMessages = collectMessages(adminMode
+                ? post.messages.getAll()
+                : post.getVisibleMessages(false).getAll());
+        for (Message message : visibleMessages) {
+            if (!isRootMessage(message) && containsIgnoreCase(message.message(), normalizedQuery)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsIgnoreCase(String value, String normalizedQuery) {
+        return value != null && value.toLowerCase().contains(normalizedQuery);
+    }
+
     private static void sortMessagesByTimestamp(ArrayList<Message> messages) {
         messages.sort(Comparator.comparingLong(Message::timestamp));
     }
@@ -1251,5 +1596,20 @@ public final class AppData {
     }
 
     private record UserVoteKey(TargetType targetType, UUID targetId, UUID userId) {
+    }
+
+    public enum NotificationType {
+        COMMENT
+    }
+
+    public record AppNotification(
+            NotificationType type,
+            UUID actorId,
+            UUID postId,
+            UUID messageId,
+            String title,
+            String body,
+            long timestamp
+    ) {
     }
 }
