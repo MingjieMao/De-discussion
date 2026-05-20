@@ -137,6 +137,17 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge"
                     android:textColor="@color/ink_secondary" />
 
+                <ImageView
+                    android:id="@+id/imagePostViewerAttachment"
+                    android:layout_width="match_parent"
+                    android:layout_height="260dp"
+                    android:layout_marginTop="12dp"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/bg_card"
+                    android:contentDescription="@string/post_image_attachment"
+                    android:scaleType="fitCenter"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/textPostViewerState"
                     android:layout_width="match_parent"

@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
+import android.net.Uri;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,6 +122,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         private final TextView textMessageTimestamp;
         private final TextView textMessageState;
         private final TextView textMessageContent;
+        private final ImageView imageMessageAttachment;
         private final TextView textMessageScore;
         private final TextView textMessageReplyCount;
         private final ImageView imageMessageReplyIcon;
@@ -139,6 +142,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             textMessageTimestamp = view.findViewById(R.id.textMessageTimestamp);
             textMessageState = view.findViewById(R.id.textMessageState);
             textMessageContent = view.findViewById(R.id.textMessageContent);
+            imageMessageAttachment = view.findViewById(R.id.imageMessageAttachment);
             textMessageScore = view.findViewById(R.id.textMessageScore);
             textMessageReplyCount = view.findViewById(R.id.textMessageReplyCount);
             imageMessageReplyIcon = view.findViewById(R.id.imageMessageReplyIcon);
@@ -170,7 +174,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             String status = AppData.getMessageStatus(itemView.getContext(), message);
             textMessageState.setText(status);
             textMessageState.setVisibility(status.isEmpty() ? View.GONE : View.VISIBLE);
-            textMessageContent.setText(message.message());
+            String content = message.message();
+            textMessageContent.setText(content);
+            textMessageContent.setVisibility(content == null || content.isEmpty() ? View.GONE : View.VISIBLE);
+            String imageUri = AppData.getMessageImageUri(message);
+            if (imageUri == null || imageUri.isEmpty()) {
+                imageMessageAttachment.setImageDrawable(null);
+                imageMessageAttachment.setOnClickListener(null);
+                imageMessageAttachment.setVisibility(View.GONE);
+            } else {
+                Uri attachmentUri = Uri.parse(imageUri);
+                imageMessageAttachment.setImageURI(attachmentUri);
+                imageMessageAttachment.setOnClickListener(v ->
+                        ImageAttachmentViewer.show(itemView.getContext(), attachmentUri, R.string.message_image_attachment));
+                imageMessageAttachment.setVisibility(View.VISIBLE);
+            }
             textMessageScore.setText(String.valueOf(AppData.getMessageVoteScore(message)));
             textMessageReplyCount.setText(String.valueOf(AppData.getMessageReplyCount(message)));
             viewMessageThreadLine.setVisibility(depth > 0 ? View.VISIBLE : View.GONE);
@@ -217,5 +235,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 rail.addView(line, new LinearLayout.LayoutParams(lineWidth, ViewGroup.LayoutParams.MATCH_PARENT));
             }
         }
+
     }
 }

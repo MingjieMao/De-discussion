@@ -43,7 +43,9 @@ public final class AppData {
     private static final TimestampFormatter TIMESTAMP_FORMATTER = new TimestampFormatterTimeSinceEnglish();
 
     private static final Map<UUID, PostMeta> POST_META = new HashMap<>();
+    private static final Map<UUID, String> POST_IMAGE_URIS = new HashMap<>();
     private static final Map<UUID, MessageMeta> MESSAGE_META = new HashMap<>();
+    private static final Map<UUID, String> MESSAGE_IMAGE_URIS = new HashMap<>();
     private static final Map<VoteTarget, Integer> BASE_VOTES = new HashMap<>();
     private static final Map<UserVoteKey, Integer> USER_VOTES = new HashMap<>();
 
@@ -75,7 +77,9 @@ public final class AppData {
         PostDAO.getInstance().clear();
         ModerationTools.clearAll();
         POST_META.clear();
+        POST_IMAGE_URIS.clear();
         MESSAGE_META.clear();
+        MESSAGE_IMAGE_URIS.clear();
         BASE_VOTES.clear();
         USER_VOTES.clear();
 
@@ -442,13 +446,17 @@ public final class AppData {
     }
 
     public static Post createPost(String topic, String body) {
+        return createPost(topic, body, null);
+    }
+
+    public static Post createPost(String topic, String body, String imageUri) {
         ensurePopulated();
         User poster = getCurrentUser();
         if (poster == null || topic == null || topic.trim().isEmpty()) {
             return null;
         }
         long now = System.currentTimeMillis();
-        return createForumPost(
+        Post post = createForumPost(
                 selectedForumKey,
                 poster,
                 topic.trim(),
@@ -456,17 +464,46 @@ public final class AppData {
                 now,
                 1
         );
+        String trimmedImageUri = imageUri == null ? "" : imageUri.trim();
+        if (!trimmedImageUri.isEmpty()) {
+            POST_IMAGE_URIS.put(post.id, trimmedImageUri);
+        }
+        return post;
     }
 
     public static Message createReply(Message parent, String content) {
+        return createReply(parent, content, null);
+    }
+
+    public static Message createReply(Message parent, String content, String imageUri) {
         ensurePopulated();
         User poster = getCurrentUser();
         Post post = getPostForMessage(parent);
-        if (poster == null || post == null || parent == null || content == null || content.trim().isEmpty()) {
+        String trimmedContent = content == null ? "" : content.trim();
+        String trimmedImageUri = imageUri == null ? "" : imageUri.trim();
+        if (poster == null || post == null || parent == null || (trimmedContent.isEmpty() && trimmedImageUri.isEmpty())) {
             return null;
         }
 
-        return addComment(post, poster, parent, System.currentTimeMillis(), content.trim(), 0);
+        Message reply = addComment(post, poster, parent, System.currentTimeMillis(), trimmedContent, 0);
+        if (!trimmedImageUri.isEmpty()) {
+            MESSAGE_IMAGE_URIS.put(reply.id(), trimmedImageUri);
+        }
+        return reply;
+    }
+
+    public static String getMessageImageUri(Message message) {
+        if (message == null) {
+            return null;
+        }
+        return MESSAGE_IMAGE_URIS.get(message.id());
+    }
+
+    public static String getPostImageUri(Post post) {
+        if (post == null) {
+            return null;
+        }
+        return POST_IMAGE_URIS.get(post.id);
     }
 
     public static boolean togglePostVote(Post post, int direction) {
