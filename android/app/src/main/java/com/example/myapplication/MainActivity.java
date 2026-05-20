@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.content.res.ColorStateList;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen.installSplashScreen(this);
         UiPreferences.applyAppearance(this);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
@@ -425,6 +428,14 @@ public class MainActivity extends AppCompatActivity {
         int backgroundColor = ContextCompat.getColor(this, selected ? R.color.accent_strong : R.color.surface_alt);
         int textColor = ContextCompat.getColor(this, selected ? R.color.white : R.color.ink_primary);
         button.setText(AppData.getForumLabel(this, forumKey));
+        Drawable avatar = ContextCompat.getDrawable(this, AppData.getForumAvatarResId(forumKey));
+        if (avatar != null) {
+            int size = dp(28);
+            avatar.setBounds(0, 0, size, size);
+        }
+        button.setCompoundDrawables(avatar, null, null, null);
+        button.setCompoundDrawablePadding(dp(12));
+        button.setGravity(android.view.Gravity.CENTER_VERTICAL);
         button.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
         button.setTextColor(textColor);
         button.setAlpha(selected ? 1.0f : 0.92f);
