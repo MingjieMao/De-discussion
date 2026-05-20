@@ -84,15 +84,34 @@
             <EditText
                 android:id="@+id/inputPostBody"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:gravity="top"
                 android:hint="@string/dialog_post_body_hint"
                 android:inputType="textCapSentences|textMultiLine"
+                android:minHeight="140dp"
                 android:textAppearance="?attr/textAppearanceBodyLarge"
                 android:textColor="@color/ink_primary"
                 android:textColorHint="@color/ink_tertiary" />
+
+            <Button
+                android:id="@+id/buttonAddPostImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/action_add_image"
+                android:textAllCaps="false" />
+
+            <ImageView
+                android:id="@+id/imagePostPreview"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="8dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/bg_card"
+                android:contentDescription="@string/post_image_attachment"
+                android:scaleType="fitCenter"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

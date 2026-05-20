@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.KeyEvent;
@@ -14,6 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -23,6 +26,7 @@ import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -44,6 +48,7 @@ public class PostViewerActivity extends AppCompatActivity {
     private TextView textPostViewerCommentsCount;
     private TextView textCommentsEmpty;
     private ImageView imagePostViewerCommunityAvatar;
+    private ImageView imagePostViewerAttachment;
     private ImageButton buttonPostUpvote;
     private ImageButton buttonPostDownvote;
     private LinearLayout buttonPostComments;
@@ -54,6 +59,25 @@ public class PostViewerActivity extends AppCompatActivity {
     private Post post;
     private Message rootMessage;
     private UUID pendingScrollMessageId;
+    private Uri selectedReplyImageUri;
+    private ImageView activeReplyImagePreview;
+
+    private final ActivityResultLauncher<String> pickReplyImageLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) {
+                    return;
+                }
+                try {
+                    selectedReplyImageUri = ImageStorage.copyToLocalImage(this, uri);
+                } catch (IOException exception) {
+                    Toast.makeText(this, getString(R.string.toast_action_failed), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (activeReplyImagePreview != null) {
+                    activeReplyImagePreview.setImageURI(selectedReplyImageUri);
+                    activeReplyImagePreview.setVisibility(View.VISIBLE);
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +111,7 @@ public class PostViewerActivity extends AppCompatActivity {
         textPostViewerCommentsCount = findViewById(R.id.textPostViewerCommentsCount);
         textCommentsEmpty = findViewById(R.id.textCommentsEmpty);
         imagePostViewerCommunityAvatar = findViewById(R.id.imagePostViewerCommunityAvatar);
+        imagePostViewerAttachment = findViewById(R.id.imagePostViewerAttachment);
         buttonPostComments = findViewById(R.id.textPostViewerComments);
         buttonPostUpvote = findViewById(R.id.buttonPostUpvote);
         buttonPostDownvote = findViewById(R.id.buttonPostDownvote);
@@ -150,6 +175,18 @@ public class PostViewerActivity extends AppCompatActivity {
         ));
         textPostViewerTitle.setText(post.topic);
         textPostViewerBody.setText(AppData.getPostBody(post));
+        String postImageUri = AppData.getPostImageUri(post);
+        if (postImageUri == null || postImageUri.isEmpty()) {
+            imagePostViewerAttachment.setImageDrawable(null);
+            imagePostViewerAttachment.setOnClickListener(null);
+            imagePostViewerAttachment.setVisibility(View.GONE);
+        } else {
+            Uri attachmentUri = Uri.parse(postImageUri);
+            imagePostViewerAttachment.setImageURI(attachmentUri);
+            imagePostViewerAttachment.setOnClickListener(v ->
+                    ImageAttachmentViewer.show(this, attachmentUri, R.string.post_image_attachment));
+            imagePostViewerAttachment.setVisibility(View.VISIBLE);
+        }
         textPostViewerCommentsCount.setText(AppData.getPostReplyCountLabel(this, post));
         textPostViewerScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
         updatePostVoteColors();
@@ -238,6 +275,7 @@ public class PostViewerActivity extends AppCompatActivity {
             return;
         }
 
+        selectedReplyImageUri = null;
         EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
@@ -251,9 +289,41 @@ public class PostViewerActivity extends AppCompatActivity {
         int vertical = dp(12);
         input.setPadding(horizontal, vertical, horizontal, vertical);
 
+        LinearLayout dialogContent = new LinearLayout(this);
+        dialogContent.setOrientation(LinearLayout.VERTICAL);
+        int dialogSpacing = dp(12);
+        dialogContent.setPadding(0, dialogSpacing, 0, 0);
+        dialogContent.addView(input, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+
+        Button buttonAttachImage = new Button(this);
+        buttonAttachImage.setText(R.string.action_add_image);
+        buttonAttachImage.setAllCaps(false);
+        buttonAttachImage.setOnClickListener(v -> pickReplyImageLauncher.launch("image/*"));
+        LinearLayout.LayoutParams attachParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        attachParams.topMargin = dialogSpacing;
+        dialogContent.addView(buttonAttachImage, attachParams);
+
+        ImageView imagePreview = new ImageView(this);
+        imagePreview.setAdjustViewBounds(true);
+        imagePreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        imagePreview.setVisibility(View.GONE);
+        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(180)
+        );
+        imageParams.topMargin = dp(8);
+        dialogContent.addView(imagePreview, imageParams);
+        activeReplyImagePreview = imagePreview;
+
         androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.dialog_reply_title)
-                .setView(input)
+                .setView(dialogContent)
                 .setNegativeButton(R.string.action_cancel, null)
                 .setPositiveButton(R.string.action_reply, null)
                 .create();
@@ -280,18 +350,23 @@ public class PostViewerActivity extends AppCompatActivity {
                 return false;
             });
         });
+        dialog.setOnDismissListener(unused -> {
+            activeReplyImagePreview = null;
+            selectedReplyImageUri = null;
+        });
         dialog.show();
         input.requestFocus();
     }
 
     private void publishReply(EditText input, Message parent, androidx.appcompat.app.AlertDialog dialog) {
         String content = input.getText().toString().trim();
-        if (content.isEmpty()) {
+        String imageUri = selectedReplyImageUri == null ? null : selectedReplyImageUri.toString();
+        if (content.isEmpty() && imageUri == null) {
             input.setError(getString(R.string.dialog_reply_body_hint));
             return;
         }
 
-        Message reply = AppData.createReply(parent, content);
+        Message reply = AppData.createReply(parent, content, imageUri);
         if (reply == null) {
             Toast.makeText(this, getString(R.string.toast_action_failed), Toast.LENGTH_SHORT).show();
             return;

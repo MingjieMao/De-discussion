@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,6 +100,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         private final ImageView imagePostCommunityAvatar;
         private final TextView textPostTitle;
         private final TextView textPostBody;
+        private final ImageView imagePostAttachment;
         private final TextView textPostScore;
         private final ImageButton buttonPostUpvote;
         private final ImageButton buttonPostDownvote;
@@ -112,6 +114,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             imagePostCommunityAvatar = view.findViewById(R.id.imagePostCommunityAvatar);
             textPostTitle = view.findViewById(R.id.textPostTitle);
             textPostBody = view.findViewById(R.id.textPostBody);
+            imagePostAttachment = view.findViewById(R.id.imagePostAttachment);
             textPostScore = view.findViewById(R.id.textPostScore);
             buttonPostUpvote = view.findViewById(R.id.buttonPostUpvote);
             buttonPostDownvote = view.findViewById(R.id.buttonPostDownvote);
@@ -129,6 +132,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             imagePostCommunityAvatar.setImageResource(AppData.getPostCommunityAvatarResId(post));
             textPostTitle.setText(post.topic);
             textPostBody.setText(AppData.getPostBodyPreview(post));
+            String imageUri = AppData.getPostImageUri(post);
+            if (imageUri == null || imageUri.isEmpty()) {
+                imagePostAttachment.setImageDrawable(null);
+                imagePostAttachment.setOnClickListener(null);
+                imagePostAttachment.setVisibility(View.GONE);
+            } else {
+                Uri attachmentUri = Uri.parse(imageUri);
+                imagePostAttachment.setImageURI(attachmentUri);
+                imagePostAttachment.setOnClickListener(v ->
+                        ImageAttachmentViewer.show(itemView.getContext(), attachmentUri, R.string.post_image_attachment));
+                imagePostAttachment.setVisibility(View.VISIBLE);
+            }
             textPostScore.setText(String.valueOf(AppData.getPostVoteScore(post)));
             textPostCommentsCount.setText(AppData.getPostReplyCountLabel(itemView.getContext(), post));
 

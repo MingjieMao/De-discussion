@@ -54,6 +54,8 @@
     <string name="action_undo_report">Undo Report</string>
     <string name="action_new_post">New Post</string>
     <string name="action_publish">Publish</string>
+    <string name="action_add_image">Add image</string>
+    <string name="action_save_image">Save image</string>
     <string name="action_like">Like</string>
     <string name="action_upvote">Upvote</string>
     <string name="action_downvote">Downvote</string>
@@ -84,6 +86,8 @@
     <string name="toast_report_removed">Report removed.</string>
     <string name="toast_post_created">Post created.</string>
     <string name="toast_reply_created">Reply posted.</string>
+    <string name="toast_image_saved">Image saved to Photos.</string>
+    <string name="toast_image_save_failed">Image could not be saved.</string>
     <string name="toast_reply_coming_soon">Reply composition is still a demo placeholder.</string>
 
     <string name="notifications_title">Notifications</string>
@@ -104,6 +108,7 @@
     <string name="post_feed_meta_format">%1$s • %2$s • %3$s</string>
     <string name="post_feed_meta_byline_format">• %1$s • %2$s</string>
     <string name="post_comments_chip">Comments %1$d</string>
+    <string name="post_image_attachment">Post image attachment</string>
 
     <string name="message_hidden_admin">Hidden from member view</string>
     <string name="message_hidden_member">Hidden by moderators</string>
@@ -111,6 +116,7 @@
     <string name="message_report_plural">%1$d active reports</string>
     <string name="message_reported_by_you">Reported by you</string>
     <string name="message_author_line">%1$s • %2$s</string>
+    <string name="message_image_attachment">Reply image attachment</string>
 
     <string name="comments_heading">Comments</string>
     <string name="comments_empty">No comments yet. This is a good post to reply to later.</string>
