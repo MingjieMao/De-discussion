@@ -1,27 +1,48 @@
 package com.example.myapplication;
 
+import android.net.Uri;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.io.IOException;
 import java.util.Locale;
 
 public class CreatePostActivity extends AppCompatActivity {
     private EditText inputPostTitle;
     private EditText inputPostBody;
+    private ImageView imagePostPreview;
     private Button buttonPublishPost;
+    private Uri selectedPostImageUri;
+
+    private final ActivityResultLauncher<String> pickPostImageLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) {
+                    return;
+                }
+                try {
+                    selectedPostImageUri = ImageStorage.copyToLocalImage(this, uri);
+                    imagePostPreview.setImageURI(selectedPostImageUri);
+                    imagePostPreview.setVisibility(android.view.View.VISIBLE);
+                } catch (IOException exception) {
+                    Toast.makeText(this, getString(R.string.toast_action_failed), Toast.LENGTH_SHORT).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +65,8 @@ public class CreatePostActivity extends AppCompatActivity {
         TextView textCreatePostAvatar = findViewById(R.id.textCreatePostAvatar);
         inputPostTitle = findViewById(R.id.inputPostTitle);
         inputPostBody = findViewById(R.id.inputPostBody);
+        imagePostPreview = findViewById(R.id.imagePostPreview);
+        Button buttonAddPostImage = findViewById(R.id.buttonAddPostImage);
         buttonPublishPost = findViewById(R.id.buttonPublishPost);
 
         String nickname = UiPreferences.getProfileNickname(this);
@@ -51,6 +74,7 @@ public class CreatePostActivity extends AppCompatActivity {
         textCreatePostAvatar.setBackground(makeAvatarBackground());
 
         buttonCancelPost.setOnClickListener(v -> finish());
+        buttonAddPostImage.setOnClickListener(v -> pickPostImageLauncher.launch("image/*"));
         buttonPublishPost.setOnClickListener(v -> publishPost());
         inputPostTitle.addTextChangedListener(new TextWatcher() {
             @Override
@@ -81,7 +105,8 @@ public class CreatePostActivity extends AppCompatActivity {
             return;
         }
 
-        AppData.createPost(title, inputPostBody.getText().toString().trim());
+        String imageUri = selectedPostImageUri == null ? null : selectedPostImageUri.toString();
+        AppData.createPost(title, inputPostBody.getText().toString().trim(), imageUri);
         Toast.makeText(this, getString(R.string.toast_post_created), Toast.LENGTH_SHORT).show();
         finish();
     }

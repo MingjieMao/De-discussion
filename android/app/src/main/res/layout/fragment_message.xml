@@ -118,6 +118,20 @@
                 android:textAppearance="?attr/textAppearanceBodyLarge"
                 android:textColor="@color/ink_primary" />
 
+            <ImageView
+                android:id="@+id/imageMessageAttachment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/bg_card"
+                android:clickable="true"
+                android:contentDescription="@string/message_image_attachment"
+                android:focusable="true"
+                android:maxHeight="320dp"
+                android:scaleType="fitCenter"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
