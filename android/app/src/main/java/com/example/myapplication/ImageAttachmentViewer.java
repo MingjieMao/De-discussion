@@ -2,13 +2,20 @@ package com.example.myapplication;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -21,19 +28,75 @@ final class ImageAttachmentViewer {
     }
 
     static void show(Context context, Uri imageUri, int titleResId) {
+        LinearLayout content = new LinearLayout(context);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setBackgroundResource(R.drawable.bg_avatar_picker_dialog);
+
+        TextView title = new TextView(context);
+        title.setText(titleResId);
+        title.setTextColor(ContextCompat.getColor(context, R.color.ink_primary));
+        title.setTextSize(20);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        title.setPadding(dp(context, 20), dp(context, 18), dp(context, 20), dp(context, 12));
+        content.addView(title, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+
         ImageView preview = new ImageView(context);
         preview.setAdjustViewBounds(true);
         preview.setScaleType(ImageView.ScaleType.FIT_CENTER);
         preview.setImageURI(imageUri);
-        int padding = Math.round(12 * context.getResources().getDisplayMetrics().density);
+        int padding = dp(context, 12);
+        preview.setBackgroundColor(Color.TRANSPARENT);
         preview.setPadding(0, padding, 0, padding);
+        content.addView(preview, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
 
-        new MaterialAlertDialogBuilder(context)
-                .setTitle(titleResId)
-                .setView(preview)
-                .setNegativeButton(R.string.action_cancel, null)
-                .setPositiveButton(R.string.action_save_image, (dialog, which) -> save(context, imageUri))
-                .show();
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setView(content)
+                .create();
+
+        LinearLayout buttonRow = new LinearLayout(context);
+        buttonRow.setGravity(android.view.Gravity.END);
+        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
+        buttonRow.setPadding(dp(context, 20), dp(context, 12), dp(context, 20), dp(context, 18));
+
+        TextView cancelButton = makeDialogButton(context, R.string.action_cancel);
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        TextView saveButton = makeDialogButton(context, R.string.action_save_image);
+        saveButton.setOnClickListener(v -> {
+            save(context, imageUri);
+            dialog.dismiss();
+        });
+        buttonRow.addView(cancelButton);
+        buttonRow.addView(saveButton);
+        content.addView(buttonRow, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    private static TextView makeDialogButton(Context context, int textResId) {
+        TextView button = new TextView(context);
+        button.setText(textResId);
+        button.setTextColor(ContextCompat.getColor(context, R.color.ink_primary));
+        button.setTextSize(14);
+        button.setTypeface(Typeface.DEFAULT_BOLD);
+        button.setGravity(android.view.Gravity.CENTER);
+        button.setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8));
+        return button;
+    }
+
+    private static int dp(Context context, int value) {
+        return Math.round(value * context.getResources().getDisplayMetrics().density);
     }
 
     private static void save(Context context, Uri sourceUri) {

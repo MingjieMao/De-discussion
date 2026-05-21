@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView saveBtn = new TextView(this);
         saveBtn.setText(R.string.action_save);
-        saveBtn.setTextColor(ContextCompat.getColor(this, R.color.accent_strong));
+        saveBtn.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
         saveBtn.setTextSize(14);
         saveBtn.setTypeface(Typeface.DEFAULT_BOLD);
         saveBtn.setPadding(dp(12), dp(8), dp(4), dp(8));
@@ -367,6 +367,10 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radioLanguageChinese = dialogView.findViewById(R.id.radioLanguageChinese);
         RadioButton radioThemeLight = dialogView.findViewById(R.id.radioThemeLight);
         RadioButton radioThemeDark = dialogView.findViewById(R.id.radioThemeDark);
+        styleDialogRadioButton(radioLanguageEnglish);
+        styleDialogRadioButton(radioLanguageChinese);
+        styleDialogRadioButton(radioThemeLight);
+        styleDialogRadioButton(radioThemeDark);
 
         if ("zh-CN".equals(UiPreferences.getLanguageTag(this))) {
             radioLanguageChinese.setChecked(true);
@@ -440,6 +444,7 @@ public class MainActivity extends AppCompatActivity {
             rbIds[i] = rb.getId();
             rb.setText(labels[i]);
             rb.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+            styleDialogRadioButton(rb);
             rb.setTextSize(16);
             rb.setPadding(dp(4), dp(10), dp(4), dp(10));
             radioGroup.addView(rb);
@@ -514,6 +519,7 @@ public class MainActivity extends AppCompatActivity {
             rbIds[i] = rb.getId();
             rb.setText(labels[i]);
             rb.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+            styleDialogRadioButton(rb);
             rb.setTextSize(16);
             rb.setPadding(dp(4), dp(10), dp(4), dp(10));
             radioGroup.addView(rb);
@@ -821,8 +827,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restartForAppearanceChange() {
+        overridePendingTransition(0, 0);
         UiPreferences.applyAppearance(this);
-        recreate();
+        getWindow().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.page_background)));
+    }
+
+    private void styleDialogRadioButton(RadioButton radioButton) {
+        int[][] states = new int[][]{
+                new int[]{android.R.attr.state_checked},
+                new int[]{-android.R.attr.state_checked}
+        };
+        int[] colors = new int[]{
+                ContextCompat.getColor(this, R.color.ink_primary),
+                ContextCompat.getColor(this, R.color.ink_secondary)
+        };
+        radioButton.setButtonTintList(new ColorStateList(states, colors));
     }
 
     private int resolveStartPage(Bundle savedInstanceState) {

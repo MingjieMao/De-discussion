@@ -86,9 +86,11 @@
 
                     <TextView
                         android:id="@+id/labelChannels"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
                         android:text="@string/nav_channels"
                         android:textColor="@color/nav_inactive"
                         android:textSize="10sp" />
@@ -113,9 +115,11 @@
 
                     <TextView
                         android:id="@+id/labelNotifications"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
                         android:text="@string/nav_notifications"
                         android:textColor="@color/nav_inactive"
                         android:textSize="10sp" />
@@ -140,9 +144,11 @@
 
                     <TextView
                         android:id="@+id/labelMarket"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
                         android:text="@string/nav_market"
                         android:textColor="@color/nav_inactive"
                         android:textSize="10sp" />
@@ -167,9 +173,11 @@
 
                     <TextView
                         android:id="@+id/labelLeaderboard"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
                         android:text="@string/nav_leaderboard"
                         android:textColor="@color/nav_inactive"
                         android:textSize="10sp" />
@@ -194,9 +202,11 @@
 
                     <TextView
                         android:id="@+id/labelYou"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
                         android:text="@string/nav_you"
                         android:textColor="@color/nav_inactive"
                         android:textSize="10sp" />

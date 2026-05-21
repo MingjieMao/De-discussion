@@ -6,13 +6,19 @@
         <item name="android:statusBarColor">@color/page_background</item>
         <item name="android:navigationBarColor">@color/page_background</item>
         <item name="android:windowBackground">@color/page_background</item>
+        <item name="android:windowAnimationStyle">@style/WindowNoAnimation</item>
+        <item name="android:windowDisablePreview">true</item>
     </style>
 
-    <style name="WindowFadeAnimation">
-        <item name="android:activityOpenEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:activityOpenExitAnimation">@android:anim/fade_out</item>
-        <item name="android:activityCloseEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:activityCloseExitAnimation">@android:anim/fade_out</item>
+    <style name="WindowNoAnimation">
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+        <item name="android:taskOpenEnterAnimation">@null</item>
+        <item name="android:taskOpenExitAnimation">@null</item>
+        <item name="android:taskCloseEnterAnimation">@null</item>
+        <item name="android:taskCloseExitAnimation">@null</item>
     </style>
 
     <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
