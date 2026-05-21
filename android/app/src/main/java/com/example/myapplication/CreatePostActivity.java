@@ -91,6 +91,7 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         });
         inputPostTitle.requestFocus();
+        refreshPublishState();
     }
 
     private void refreshPublishState() {

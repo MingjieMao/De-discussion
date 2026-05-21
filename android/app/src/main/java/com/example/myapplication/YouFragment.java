@@ -97,7 +97,8 @@ public class YouFragment extends Fragment implements RefreshablePage {
     }
 
     private GradientDrawable makeAvatarBackground(int avatarIndex) {
-        GradientDrawable drawable = (GradientDrawable) ContextCompat.getDrawable(requireContext(), R.drawable.bg_avatar_circle).mutate();
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.OVAL);
         drawable.setColor(UiPreferences.getGoogleColor(avatarIndex));
         return drawable;
     }

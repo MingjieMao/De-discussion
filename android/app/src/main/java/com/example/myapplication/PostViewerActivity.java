@@ -110,7 +110,13 @@ public class PostViewerActivity extends AppCompatActivity {
                     initialPaddingLeft,
                     systemBars.top + initialPaddingTop,
                     initialPaddingRight,
-                    systemBars.bottom + initialPaddingBottom
+                    initialPaddingBottom
+            );
+            postViewerScroll.setPaddingRelative(
+                    postViewerScroll.getPaddingStart(),
+                    postViewerScroll.getPaddingTop(),
+                    postViewerScroll.getPaddingEnd(),
+                    systemBars.bottom + dp(12)
             );
             return insets;
         });
@@ -233,7 +239,7 @@ public class PostViewerActivity extends AppCompatActivity {
 
     private void updatePostVoteColors() {
         int upvoteColor = ContextCompat.getColor(this, R.color.vote_up);
-        int neutralColor = ContextCompat.getColor(this, R.color.ink_secondary);
+        int neutralColor = ContextCompat.getColor(this, R.color.ink_faint);
         int downvoteColor = ContextCompat.getColor(this, R.color.vote_down);
         int primaryColor = ContextCompat.getColor(this, R.color.ink_primary);
         int reportColor = ContextCompat.getColor(this, R.color.danger_ink);
@@ -249,7 +255,7 @@ public class PostViewerActivity extends AppCompatActivity {
         if (AppData.isAdminMode()) {
             buttonPostMenu.setImageResource(R.drawable.ic_hidden_24);
         } else {
-            buttonPostMenu.setImageResource(activeAction ? R.drawable.ic_flag_24 : R.drawable.ic_flag_outline_24);
+            buttonPostMenu.setImageResource(R.drawable.ic_flag_outline_24);
         }
         buttonPostMenu.setColorFilter(activeAction ? reportColor : neutralColor);
         textPostViewerScore.setTextColor(voteDirection > 0
@@ -408,7 +414,8 @@ public class PostViewerActivity extends AppCompatActivity {
         });
         updateReplySendState(buttonSend, input);
 
-        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this,
+                R.style.ThemeOverlay_App_MaterialAlertDialog)
                 .setView(dialogContent)
                 .create();
 

@@ -78,11 +78,11 @@
 
                 <ImageButton
                     android:id="@+id/buttonMessageMenu"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/action_report"
-                    android:padding="5dp"
+                    android:padding="6dp"
                     android:src="@drawable/ic_flag_outline_24" />
             </LinearLayout>
 
@@ -138,14 +138,14 @@
 
                     <ImageButton
                         android:id="@+id/buttonMessageUpvote"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
                         android:background="@android:color/transparent"
                         android:clickable="true"
                         android:contentDescription="@string/action_upvote"
                         android:focusable="true"
-                        android:padding="4dp"
-                        android:src="@drawable/ic_vote_up_outline_24" />
+                        android:padding="6dp"
+                        android:src="@drawable/ic_message_vote_up_outline_24" />
 
                     <TextView
                         android:id="@+id/textMessageScore"
@@ -165,14 +165,14 @@
 
                     <ImageButton
                         android:id="@+id/buttonMessageDownvote"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
                         android:background="@android:color/transparent"
                         android:clickable="true"
                         android:contentDescription="@string/action_downvote"
                         android:focusable="true"
-                        android:padding="4dp"
-                        android:src="@drawable/ic_vote_down_outline_24" />
+                        android:padding="6dp"
+                        android:src="@drawable/ic_message_vote_down_outline_24" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -192,9 +192,9 @@
 
                     <ImageView
                         android:id="@+id/imageMessageReplyIcon"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:padding="2dp"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:padding="5dp"
                         android:src="@drawable/ic_comment_outline_24" />
 
                     <TextView

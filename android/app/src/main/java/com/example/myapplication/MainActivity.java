@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,11 +61,18 @@ public class MainActivity extends AppCompatActivity {
     private TextView labelChannels;
     private TextView labelNotifications;
     private TextView labelYou;
-    private Button buttonDrawerForumAnu;
-    private Button buttonDrawerForumUnsw;
-    private Button buttonDrawerForumUsyd;
-    private Button buttonDrawerForumUm;
-    private Button buttonDrawerSettings;
+    private LinearLayout buttonDrawerForumAnu;
+    private LinearLayout buttonDrawerForumUnsw;
+    private LinearLayout buttonDrawerForumUsyd;
+    private LinearLayout buttonDrawerForumUm;
+    private ImageView imageDrawerForumAnu;
+    private ImageView imageDrawerForumUnsw;
+    private ImageView imageDrawerForumUsyd;
+    private ImageView imageDrawerForumUm;
+    private TextView textDrawerForumAnu;
+    private TextView textDrawerForumUnsw;
+    private TextView textDrawerForumUsyd;
+    private TextView textDrawerForumUm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +80,12 @@ public class MainActivity extends AppCompatActivity {
         UiPreferences.applyAppearance(this);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        getWindow().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.page_background)));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            getWindow().setNavigationBarContrastEnforced(false);
+        }
         setContentView(R.layout.activity_main);
 
         AppData.ensurePopulated();
@@ -96,7 +111,14 @@ public class MainActivity extends AppCompatActivity {
         buttonDrawerForumUnsw = findViewById(R.id.buttonDrawerForumUnsw);
         buttonDrawerForumUsyd = findViewById(R.id.buttonDrawerForumUsyd);
         buttonDrawerForumUm = findViewById(R.id.buttonDrawerForumUm);
-        buttonDrawerSettings = findViewById(R.id.buttonDrawerSettings);
+        imageDrawerForumAnu = findViewById(R.id.imageDrawerForumAnu);
+        imageDrawerForumUnsw = findViewById(R.id.imageDrawerForumUnsw);
+        imageDrawerForumUsyd = findViewById(R.id.imageDrawerForumUsyd);
+        imageDrawerForumUm = findViewById(R.id.imageDrawerForumUm);
+        textDrawerForumAnu = findViewById(R.id.textDrawerForumAnu);
+        textDrawerForumUnsw = findViewById(R.id.textDrawerForumUnsw);
+        textDrawerForumUsyd = findViewById(R.id.textDrawerForumUsyd);
+        textDrawerForumUm = findViewById(R.id.textDrawerForumUm);
 
         applyInsets(mainContent, true);
         applyInsets(drawerPanel, false);
@@ -105,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
         buttonDrawerForumUnsw.setOnClickListener(v -> switchForum(AppData.FORUM_UNSW));
         buttonDrawerForumUsyd.setOnClickListener(v -> switchForum(AppData.FORUM_USYD));
         buttonDrawerForumUm.setOnClickListener(v -> switchForum(AppData.FORUM_UM));
-        buttonDrawerSettings.setOnClickListener(v -> showSettingsDialog());
 
         configurePager();
         configureTabBar();
@@ -191,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         titleParams.setMargins(0, 0, 0, dp(10));
         content.addView(title, titleParams);
 
-        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
                 .setView(content)
                 .create();
 
@@ -231,10 +252,9 @@ public class MainActivity extends AppCompatActivity {
 
             row.setOnClickListener(v -> {
                 UiPreferences.setAvatarIndex(this, index);
+                dialog.dismiss();
                 notifyPagesChanged();
                 Toast.makeText(this, getString(R.string.toast_profile_saved), Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-                recreate();
             });
 
             content.addView(row, new LinearLayout.LayoutParams(
@@ -250,35 +270,75 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showNicknameDialog() {
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setBackgroundResource(R.drawable.bg_avatar_picker_dialog);
+        content.setPadding(dp(20), dp(18), dp(20), dp(14));
+
+        TextView title = new TextView(this);
+        title.setText(R.string.dialog_edit_nickname_title);
+        title.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        title.setTextSize(20);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleParams.setMargins(0, 0, 0, dp(14));
+        content.addView(title, titleParams);
+
         EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         input.setHint(R.string.dialog_nickname_hint);
         input.setText(UiPreferences.getProfileNickname(this));
         input.setSelection(input.getText().length());
-        int horizontal = dp(16);
-        int vertical = dp(12);
-        input.setPadding(horizontal, vertical, horizontal, vertical);
+        input.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        content.addView(input, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.dialog_edit_nickname_title)
-                .setView(input)
-                .setNegativeButton(R.string.action_cancel, null)
-                .setPositiveButton(R.string.action_save, null)
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setView(content)
                 .create();
 
-        dialog.setOnShowListener(unused -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener(v -> {
-                    String value = input.getText().toString().trim();
-                    if (value.isEmpty()) {
-                        input.setError(getString(R.string.dialog_nickname_hint));
-                        return;
-                    }
-                    UiPreferences.setProfileNickname(this, value);
-                    notifyPagesChanged();
-                    Toast.makeText(this, getString(R.string.toast_profile_saved), Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                }));
+        LinearLayout buttonRow = new LinearLayout(this);
+        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
+        buttonRow.setGravity(android.view.Gravity.END);
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        rowParams.setMargins(0, dp(16), 0, 0);
+
+        TextView cancelBtn = new TextView(this);
+        cancelBtn.setText(R.string.action_cancel);
+        cancelBtn.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        cancelBtn.setTextSize(14);
+        cancelBtn.setTypeface(Typeface.DEFAULT_BOLD);
+        cancelBtn.setPadding(dp(12), dp(8), dp(12), dp(8));
+        cancelBtn.setOnClickListener(v -> dialog.dismiss());
+
+        TextView saveBtn = new TextView(this);
+        saveBtn.setText(R.string.action_save);
+        saveBtn.setTextColor(ContextCompat.getColor(this, R.color.accent_strong));
+        saveBtn.setTextSize(14);
+        saveBtn.setTypeface(Typeface.DEFAULT_BOLD);
+        saveBtn.setPadding(dp(12), dp(8), dp(4), dp(8));
+        saveBtn.setOnClickListener(v -> {
+            String value = input.getText().toString().trim();
+            if (value.isEmpty()) {
+                input.setError(getString(R.string.dialog_nickname_hint));
+                return;
+            }
+            UiPreferences.setProfileNickname(this, value);
+            notifyPagesChanged();
+            Toast.makeText(this, getString(R.string.toast_profile_saved), Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        buttonRow.addView(cancelBtn);
+        buttonRow.addView(saveBtn);
+        content.addView(buttonRow, rowParams);
+
         dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
 
     public void showSettingsDialog() {
@@ -300,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
             radioThemeLight.setChecked(true);
         }
 
-        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
                 .setTitle(R.string.settings_title)
                 .setView(dialogView)
                 .setNegativeButton(R.string.action_cancel, null)
@@ -329,47 +389,151 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showLanguageDialog() {
-        String[] languages = {
-                getString(R.string.settings_language_en),
-                getString(R.string.settings_language_zh)
-        };
-        int checked = "zh-CN".equals(UiPreferences.getLanguageTag(this)) ? 1 : 0;
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setBackgroundResource(R.drawable.bg_avatar_picker_dialog);
+        content.setPadding(dp(20), dp(18), dp(20), dp(14));
 
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.settings_language)
-                .setSingleChoiceItems(languages, checked, (dialog, which) -> {
-                    String newLanguage = which == 1 ? "zh-CN" : "en";
-                    boolean changed = !newLanguage.equals(UiPreferences.getLanguageTag(this));
-                    UiPreferences.setLanguageTag(this, newLanguage);
+        TextView title = new TextView(this);
+        title.setText(R.string.settings_language);
+        title.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        title.setTextSize(20);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleParams.setMargins(0, 0, 0, dp(6));
+        content.addView(title, titleParams);
+
+        String[] labels = {getString(R.string.settings_language_en), getString(R.string.settings_language_zh)};
+        String[] langTags = {"en", "zh-CN"};
+        int checkedIndex = "zh-CN".equals(UiPreferences.getLanguageTag(this)) ? 1 : 0;
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setView(content)
+                .create();
+
+        RadioGroup radioGroup = new RadioGroup(this);
+        int[] rbIds = new int[labels.length];
+        for (int i = 0; i < labels.length; i++) {
+            RadioButton rb = new RadioButton(this);
+            rb.setId(android.view.View.generateViewId());
+            rbIds[i] = rb.getId();
+            rb.setText(labels[i]);
+            rb.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+            rb.setTextSize(16);
+            rb.setPadding(dp(4), dp(10), dp(4), dp(10));
+            radioGroup.addView(rb);
+        }
+        radioGroup.check(rbIds[checkedIndex]);
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            for (int i = 0; i < rbIds.length; i++) {
+                if (rbIds[i] == checkedId) {
+                    String langTag = langTags[i];
+                    boolean changed = !langTag.equals(UiPreferences.getLanguageTag(this));
+                    UiPreferences.setLanguageTag(this, langTag);
                     dialog.dismiss();
-                    if (changed) {
-                        restartForAppearanceChange();
-                    }
-                })
-                .setNegativeButton(R.string.action_cancel, null)
-                .show();
+                    if (changed) restartForAppearanceChange();
+                    return;
+                }
+            }
+        });
+        content.addView(radioGroup, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        LinearLayout buttonRow = new LinearLayout(this);
+        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
+        buttonRow.setGravity(android.view.Gravity.END);
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        rowParams.setMargins(0, dp(8), 0, 0);
+        TextView cancelBtn = new TextView(this);
+        cancelBtn.setText(R.string.action_cancel);
+        cancelBtn.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        cancelBtn.setTextSize(14);
+        cancelBtn.setTypeface(Typeface.DEFAULT_BOLD);
+        cancelBtn.setPadding(dp(12), dp(8), dp(4), dp(8));
+        cancelBtn.setOnClickListener(v -> dialog.dismiss());
+        buttonRow.addView(cancelBtn);
+        content.addView(buttonRow, rowParams);
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
 
     public void showThemeDialog() {
-        String[] themes = {
-                getString(R.string.settings_theme_light),
-                getString(R.string.settings_theme_dark)
-        };
-        int checked = UiPreferences.isDarkTheme(this) ? 1 : 0;
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setBackgroundResource(R.drawable.bg_avatar_picker_dialog);
+        content.setPadding(dp(20), dp(18), dp(20), dp(14));
 
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.settings_theme)
-                .setSingleChoiceItems(themes, checked, (dialog, which) -> {
-                    boolean newDarkTheme = which == 1;
-                    boolean changed = newDarkTheme != UiPreferences.isDarkTheme(this);
-                    UiPreferences.setDarkTheme(this, newDarkTheme);
+        TextView title = new TextView(this);
+        title.setText(R.string.settings_theme);
+        title.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        title.setTextSize(20);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleParams.setMargins(0, 0, 0, dp(6));
+        content.addView(title, titleParams);
+
+        String[] labels = {getString(R.string.settings_theme_light), getString(R.string.settings_theme_dark)};
+        boolean[] darkFlags = {false, true};
+        int checkedIndex = UiPreferences.isDarkTheme(this) ? 1 : 0;
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setView(content)
+                .create();
+
+        RadioGroup radioGroup = new RadioGroup(this);
+        int[] rbIds = new int[labels.length];
+        for (int i = 0; i < labels.length; i++) {
+            RadioButton rb = new RadioButton(this);
+            rb.setId(android.view.View.generateViewId());
+            rbIds[i] = rb.getId();
+            rb.setText(labels[i]);
+            rb.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+            rb.setTextSize(16);
+            rb.setPadding(dp(4), dp(10), dp(4), dp(10));
+            radioGroup.addView(rb);
+        }
+        radioGroup.check(rbIds[checkedIndex]);
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            for (int i = 0; i < rbIds.length; i++) {
+                if (rbIds[i] == checkedId) {
+                    boolean isDark = darkFlags[i];
+                    boolean changed = isDark != UiPreferences.isDarkTheme(this);
+                    UiPreferences.setDarkTheme(this, isDark);
                     dialog.dismiss();
-                    if (changed) {
-                        restartForAppearanceChange();
-                    }
-                })
-                .setNegativeButton(R.string.action_cancel, null)
-                .show();
+                    if (changed) restartForAppearanceChange();
+                    return;
+                }
+            }
+        });
+        content.addView(radioGroup, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        LinearLayout buttonRow = new LinearLayout(this);
+        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
+        buttonRow.setGravity(android.view.Gravity.END);
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        rowParams.setMargins(0, dp(8), 0, 0);
+        TextView cancelBtn = new TextView(this);
+        cancelBtn.setText(R.string.action_cancel);
+        cancelBtn.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        cancelBtn.setTextSize(14);
+        cancelBtn.setTypeface(Typeface.DEFAULT_BOLD);
+        cancelBtn.setPadding(dp(12), dp(8), dp(4), dp(8));
+        cancelBtn.setOnClickListener(v -> dialog.dismiss());
+        buttonRow.addView(cancelBtn);
+        content.addView(buttonRow, rowParams);
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
 
     private void configurePager() {
@@ -541,6 +705,74 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void playTabHint(int page) {
+        if (page == MainPagerAdapter.PAGE_CHANNELS) {
+            playChannelDotsHint();
+        } else if (page == MainPagerAdapter.PAGE_NOTIFICATIONS) {
+            playNotificationShakeHint();
+        } else if (page == MainPagerAdapter.PAGE_YOU) {
+            playYouSlideHint();
+        }
+    }
+
+    private void playChannelDotsHint() {
+        if (channelDots == null) {
+            return;
+        }
+
+        channelDots.animate().cancel();
+        iconChannels.animate().cancel();
+
+        channelDots.setAlpha(0f);
+        channelDots.setScaleX(0.85f);
+        channelDots.setScaleY(0.85f);
+
+        iconChannels.setScaleX(1.0f);
+        iconChannels.setScaleY(1.0f);
+
+        ObjectAnimator dotsAlpha = ObjectAnimator.ofFloat(channelDots, View.ALPHA, 0f, 1f, 1f, 0f);
+        ObjectAnimator dotsScaleX = ObjectAnimator.ofFloat(channelDots, View.SCALE_X, 0.85f, 1.35f, 1.35f, 0.85f);
+        ObjectAnimator dotsScaleY = ObjectAnimator.ofFloat(channelDots, View.SCALE_Y, 0.85f, 1.35f, 1.35f, 0.85f);
+        ObjectAnimator iconScaleX = ObjectAnimator.ofFloat(iconChannels, View.SCALE_X, 1.0f, 1.28f, 1.28f, 1.0f);
+        ObjectAnimator iconScaleY = ObjectAnimator.ofFloat(iconChannels, View.SCALE_Y, 1.0f, 1.28f, 1.28f, 1.0f);
+
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(dotsAlpha, dotsScaleX, dotsScaleY, iconScaleX, iconScaleY);
+        set.setDuration(1000L);
+        set.setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f));
+        set.start();
+    }
+
+    private void playNotificationShakeHint() {
+        iconNotifications.animate().cancel();
+        iconNotifications.setTranslationX(0f);
+
+        ObjectAnimator shake = ObjectAnimator.ofFloat(
+                iconNotifications,
+                View.TRANSLATION_X,
+                0f, -dp(6), dp(6), -dp(6), dp(6), 0f, -dp(6), dp(6), -dp(6), dp(6), 0f
+        );
+        shake.setDuration(720L);
+        shake.setInterpolator(new PathInterpolator(0.36f, 0f, 0.66f, -0.56f));
+        shake.start();
+    }
+
+    private void playYouSlideHint() {
+        iconYou.animate().cancel();
+
+        iconYou.setAlpha(0f);
+        iconYou.setTranslationX(-dp(22));
+
+        ObjectAnimator slide = ObjectAnimator.ofFloat(iconYou, View.TRANSLATION_X, -dp(22), 0f);
+        ObjectAnimator fade = ObjectAnimator.ofFloat(iconYou, View.ALPHA, 0f, 1f);
+
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(slide, fade);
+        set.setDuration(1000L);
+        set.setInterpolator(new PathInterpolator(0.22f, 1f, 0.36f, 1f));
+        set.start();
+    }
+
     private void setPage(int page, boolean smoothScroll) {
         if (viewPager.getCurrentItem() != page) {
             viewPager.setCurrentItem(page, smoothScroll);
@@ -552,10 +784,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshDrawerUi() {
-        styleForumButton(buttonDrawerForumAnu, AppData.FORUM_ANU);
-        styleForumButton(buttonDrawerForumUnsw, AppData.FORUM_UNSW);
-        styleForumButton(buttonDrawerForumUsyd, AppData.FORUM_USYD);
-        styleForumButton(buttonDrawerForumUm, AppData.FORUM_UM);
+        styleForumButton(buttonDrawerForumAnu, imageDrawerForumAnu, textDrawerForumAnu, AppData.FORUM_ANU);
+        styleForumButton(buttonDrawerForumUnsw, imageDrawerForumUnsw, textDrawerForumUnsw, AppData.FORUM_UNSW);
+        styleForumButton(buttonDrawerForumUsyd, imageDrawerForumUsyd, textDrawerForumUsyd, AppData.FORUM_USYD);
+        styleForumButton(buttonDrawerForumUm, imageDrawerForumUm, textDrawerForumUm, AppData.FORUM_UM);
     }
 
     private void notifyPagesChanged() {
@@ -586,11 +818,13 @@ public class MainActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(target, (view, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
             view.setPaddingRelative(
                     start,
                     top + systemBars.top,
                     end,
-                    bottom + (includeBottom ? systemBars.bottom : 0)
+                    imeVisible ? view.getPaddingBottom()
+                               : bottom + (includeBottom ? systemBars.bottom : 0)
             );
             return insets;
         });
@@ -633,22 +867,14 @@ public class MainActivity extends AppCompatActivity {
                 .start();
     }
 
-    private void styleForumButton(Button button, String forumKey) {
+    private void styleForumButton(LinearLayout button, ImageView avatar, TextView label, String forumKey) {
         boolean selected = AppData.isSelectedForum(forumKey);
-        int backgroundColor = ContextCompat.getColor(this, selected ? R.color.accent_strong : R.color.surface_alt);
-        int textColor = ContextCompat.getColor(this, selected ? R.color.white : R.color.ink_primary);
-        button.setText(AppData.getForumLabel(this, forumKey));
-        Drawable avatar = ContextCompat.getDrawable(this, AppData.getForumAvatarResId(forumKey));
-        if (avatar != null) {
-            int size = dp(28);
-            avatar.setBounds(0, 0, size, size);
-        }
-        button.setCompoundDrawables(avatar, null, null, null);
-        button.setCompoundDrawablePadding(dp(12));
-        button.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        int backgroundColor = ContextCompat.getColor(this, selected ? R.color.tab_bar_fill : R.color.surface);
+        label.setText(AppData.getForumLabel(this, forumKey));
+        label.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
+        avatar.setImageResource(AppData.getForumAvatarResId(forumKey));
         button.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
-        button.setTextColor(textColor);
-        button.setAlpha(selected ? 1.0f : 0.92f);
+        button.setAlpha(selected ? 1.0f : 0.78f);
     }
 
     private void syncIndicatorTo(float pageOffset, boolean animate) {

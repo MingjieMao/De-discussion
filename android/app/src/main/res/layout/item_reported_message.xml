@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/reportedRowRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -53,9 +54,15 @@
             android:id="@+id/buttonReportedAction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/accent_strong"
+            app:backgroundTint="@color/tab_bar_fill"
+            app:strokeColor="@color/surface_border"
+            app:strokeWidth="1.5dp"
+            app:cornerRadius="999dp"
+            app:icon="@drawable/ic_flag_outline_24"
+            app:iconSize="16dp"
+            app:iconTint="@color/ink_primary"
             android:textAllCaps="false"
-            android:textColor="@color/white" />
+            android:textColor="@color/ink_primary" />
     </LinearLayout>
 
 </LinearLayout>
