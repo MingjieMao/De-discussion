@@ -426,6 +426,10 @@ public class PostViewerActivity extends AppCompatActivity {
             activeReplySendButton = null;
             selectedReplyImageUri = null;
         });
+        dialog.setOnDismissListener(unused -> {
+            activeReplyImagePreview = null;
+            selectedReplyImageUri = null;
+        });
         dialog.show();
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));

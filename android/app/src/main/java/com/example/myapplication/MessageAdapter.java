@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.net.Uri;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
