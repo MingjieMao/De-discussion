@@ -47,6 +47,7 @@ public final class AppData {
     private static final Map<UUID, String> POST_IMAGE_URIS = new HashMap<>();
     private static final Map<UUID, MessageMeta> MESSAGE_META = new HashMap<>();
     private static final Map<UUID, String> MESSAGE_IMAGE_URIS = new HashMap<>();
+    private static final Map<UUID, Integer> POST_TOP_RANKS = new HashMap<>();
     private static final Map<VoteTarget, Integer> BASE_VOTES = new HashMap<>();
     private static final Map<UserVoteKey, Integer> USER_VOTES = new HashMap<>();
 
@@ -86,6 +87,7 @@ public final class AppData {
         POST_IMAGE_URIS.clear();
         MESSAGE_META.clear();
         MESSAGE_IMAGE_URIS.clear();
+        POST_TOP_RANKS.clear();
         BASE_VOTES.clear();
         USER_VOTES.clear();
 
@@ -209,7 +211,9 @@ public final class AppData {
             posts.add(post);
         }
 
-        posts.sort(Comparator.comparingLong(AppData::getLatestActivityTimestamp).reversed());
+        posts.sort(Comparator
+                .comparingInt(AppData::getTopRank)
+                .thenComparing(Comparator.comparingLong(AppData::getLatestActivityTimestamp).reversed()));
         return posts;
     }
 
@@ -955,6 +959,7 @@ public final class AppData {
                 now - minutes(96),
                 42
         );
+        pinPostToTop(layoutPost, 0);
         POST_IMAGE_URIS.put(layoutPost.id, drawableImageUri(R.drawable.avatar_anu));
         Message layoutTopReply = addComment(
                 layoutPost,
@@ -1069,6 +1074,7 @@ public final class AppData {
                 now - minutes(49),
                 19
         );
+        pinPostToTop(nestedPost, 1);
         Message nestedRootReply = addComment(
                 nestedPost,
                 memberViewer,
@@ -1356,6 +1362,12 @@ public final class AppData {
         }
     }
 
+    private static void pinPostToTop(Post post, int rank) {
+        if (post != null) {
+            POST_TOP_RANKS.put(post.id, rank);
+        }
+    }
+
     private static ArrayList<Message> getAllMessages() {
         ArrayList<Message> messages = new ArrayList<>();
         Iterator<Message> iterator = PostDAO.getInstance().getAllMessages();
@@ -1517,6 +1529,11 @@ public final class AppData {
             return Long.MIN_VALUE;
         }
         return Collections.max(messages, Comparator.comparingLong(Message::timestamp)).timestamp();
+    }
+
+    private static int getTopRank(Post post) {
+        Integer rank = post == null ? null : POST_TOP_RANKS.get(post.id);
+        return rank == null ? Integer.MAX_VALUE : rank;
     }
 
     private static long minutes(long amount) {
