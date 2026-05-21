@@ -43,7 +43,7 @@
     <color name="nav_active">#23272F</color>
     <color name="nav_inactive">#7B8595</color>
     <color name="tab_press_ripple">#12000000</color>
-    <color name="launcher_brand">#4752C4</color>
+    <color name="launcher_brand">#FF000000</color>
     <color name="avatar_border">#E2E5EA</color>
     <color name="forum_anu_header">#7A203E</color>
     <color name="forum_unsw_header">#8E640B</color>
