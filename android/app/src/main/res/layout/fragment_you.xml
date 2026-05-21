@@ -1,39 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/page_background"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="16dp">
+        android:paddingBottom="32dp">
 
+        <!-- Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="28dp"
+            android:paddingBottom="0dp"
             android:text="@string/you_title"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textAppearance="?attr/textAppearanceHeadlineLarge"
             android:textColor="@color/ink_primary"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/textYouSubtitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/you_subtitle"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="@color/ink_secondary" />
-
+        <!-- Profile Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp"
             android:layout_marginTop="20dp"
             android:background="@drawable/bg_card"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -43,8 +47,8 @@
 
                 <TextView
                     android:id="@+id/textYouAvatar"
-                    android:layout_width="82dp"
-                    android:layout_height="82dp"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
                     android:background="@drawable/bg_avatar_circle"
                     android:gravity="center"
                     android:text="C"
@@ -71,7 +75,7 @@
                         android:id="@+id/textYouUid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
+                        android:layout_marginTop="4dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="@color/ink_secondary" />
                 </LinearLayout>
@@ -81,96 +85,161 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/buttonEditAvatar"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:layout_height="44dp"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/accent_soft"
+                    app:backgroundTint="@color/surface"
+                    app:strokeColor="@color/surface_border"
+                    app:strokeWidth="1.5dp"
+                    app:cornerRadius="14dp"
+                    app:icon="@drawable/ic_user_24"
+                    app:iconSize="18dp"
+                    app:iconTint="@color/ink_primary"
+                    app:iconPadding="8dp"
+                    app:iconGravity="textStart"
                     android:text="@string/drawer_change_avatar"
                     android:textAllCaps="false"
-                    android:textColor="@color/accent_on_soft" />
+                    android:textColor="@color/ink_primary"
+                    android:textSize="14sp" />
 
                 <Button
                     android:id="@+id/buttonEditNickname"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_height="44dp"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/accent_soft"
+                    android:layout_marginStart="10dp"
+                    app:backgroundTint="@color/surface"
+                    app:strokeColor="@color/surface_border"
+                    app:strokeWidth="1.5dp"
+                    app:cornerRadius="14dp"
+                    app:icon="@drawable/ic_edit_24"
+                    app:iconSize="18dp"
+                    app:iconTint="@color/ink_primary"
+                    app:iconPadding="8dp"
+                    app:iconGravity="textStart"
                     android:text="@string/action_edit_nickname"
                     android:textAllCaps="false"
-                    android:textColor="@color/accent_on_soft" />
+                    android:textColor="@color/ink_primary"
+                    android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Settings Card: Language + Theme in one card -->
         <LinearLayout
-            android:id="@+id/buttonYouLanguage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginTop="16dp"
             android:background="@drawable/bg_card"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="18dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/settings_language"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/ink_primary"
-                android:textStyle="bold" />
+            <!-- Language Row -->
+            <LinearLayout
+                android:id="@+id/buttonYouLanguage"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="18dp"
+                android:paddingEnd="14dp">
 
-            <TextView
-                android:id="@+id/textYouLanguageValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_secondary" />
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_language_24"
+                    android:tint="@color/ink_secondary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:text="@string/settings_language"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/ink_primary" />
+
+                <TextView
+                    android:id="@+id/textYouLanguageValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="2dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/ink_secondary" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_chevron_right_24"
+                    android:tint="@color/ink_tertiary" />
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="56dp"
+                android:background="@color/surface_border" />
+
+            <!-- Theme Row -->
+            <LinearLayout
+                android:id="@+id/buttonYouTheme"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="18dp"
+                android:paddingEnd="14dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_palette_24"
+                    android:tint="@color/ink_secondary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:text="@string/settings_theme"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/ink_primary" />
+
+                <TextView
+                    android:id="@+id/textYouThemeValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="2dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/ink_secondary" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_chevron_right_24"
+                    android:tint="@color/ink_tertiary" />
+            </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/buttonYouTheme"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_card"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="18dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/settings_theme"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/ink_primary"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/textYouThemeValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_secondary" />
-        </LinearLayout>
-
+        <!-- Admin Section Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginTop="16dp"
             android:background="@drawable/bg_card"
             android:orientation="vertical"
             android:padding="18dp">
@@ -185,44 +254,45 @@
                 android:paddingEnd="14dp"
                 android:paddingBottom="8dp"
                 android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="@color/accent_on_soft"
+                android:textColor="@color/nav_active"
                 android:textStyle="bold" />
 
-            <TextView
+            <Button
+                android:id="@+id/buttonYouToggleMode"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                app:backgroundTint="@color/tab_bar_fill"
+                app:strokeColor="@color/surface_border"
+                app:strokeWidth="1.5dp"
+                app:cornerRadius="14dp"
+                app:icon="@drawable/ic_shield_outline_24"
+                app:iconSize="20dp"
+                app:iconTint="@color/ink_primary"
+                app:iconPadding="10dp"
+                app:iconGravity="textStart"
+                android:textAllCaps="false"
+                android:textColor="@color/ink_primary"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/buttonYouQueue"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
                 android:layout_marginTop="10dp"
-                android:text="@string/you_mode_body"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/ink_secondary" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/buttonYouToggleMode"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/accent_strong"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white" />
-
-                <Button
-                    android:id="@+id/buttonYouQueue"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/surface_alt"
-                    android:text="@string/drawer_queue"
-                    android:textAllCaps="false"
-                    android:textColor="@color/ink_primary" />
-            </LinearLayout>
+                app:backgroundTint="@color/tab_bar_fill"
+                app:strokeColor="@color/surface_border"
+                app:strokeWidth="1.5dp"
+                app:cornerRadius="14dp"
+                app:icon="@drawable/ic_flag_outline_24"
+                app:iconSize="20dp"
+                app:iconTint="@color/ink_primary"
+                app:iconPadding="10dp"
+                app:iconGravity="textStart"
+                android:text="@string/drawer_queue"
+                android:textAllCaps="false"
+                android:textColor="@color/ink_primary"
+                android:textSize="15sp" />
         </LinearLayout>
 
     </LinearLayout>

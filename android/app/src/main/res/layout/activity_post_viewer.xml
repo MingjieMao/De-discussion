@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/postViewerRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,7 +18,10 @@
             android:id="@+id/buttonBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/surface_alt"
+            app:backgroundTint="@color/tab_bar_fill"
+            app:strokeColor="@color/surface_border"
+            app:strokeWidth="1.5dp"
+            app:cornerRadius="999dp"
             android:text="@string/action_back"
             android:textAllCaps="false"
             android:textColor="@color/ink_primary" />
@@ -37,7 +41,7 @@
             android:paddingEnd="14dp"
             android:paddingBottom="8dp"
             android:textAppearance="?attr/textAppearanceTitleSmall"
-            android:textColor="@color/accent_on_soft"
+            android:textColor="@color/nav_active"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -96,7 +100,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:textAppearance="?attr/textAppearanceBodySmall"
-                                android:textColor="@color/accent_strong"
+                                android:textColor="@color/ink_secondary"
                                 android:textStyle="bold" />
                         </LinearLayout>
 
@@ -111,8 +115,9 @@
 
                     <ImageButton
                         android:id="@+id/buttonPostMenu"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center_vertical"
                         android:background="@android:color/transparent"
                         android:contentDescription="@string/action_report"
                         android:padding="8dp"

@@ -14,15 +14,6 @@
         android:textColor="@color/ink_primary"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/textNotificationsSubtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="@string/notifications_subtitle"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="@color/ink_secondary" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerNotifications"
         android:layout_width="match_parent"

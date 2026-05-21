@@ -3,10 +3,14 @@
     android:id="@+id/postRowRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/transparent"
+    android:background="@color/page_background"
+    android:clickable="true"
+    android:focusable="false"
+    android:foreground="@null"
     android:orientation="vertical"
     android:paddingTop="18dp"
-    android:paddingBottom="14dp">
+    android:paddingBottom="14dp"
+    android:stateListAnimator="@null">
 
     <LinearLayout
         android:id="@+id/layoutPostCommunity"
@@ -30,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="@color/accent_strong"
+            android:textColor="@color/ink_secondary"
             android:textStyle="bold" />
 
         <TextView
@@ -136,7 +140,9 @@
             android:layout_marginStart="12dp"
             android:background="@drawable/bg_pill"
             android:clickable="true"
-            android:focusable="true"
+            android:focusable="false"
+            android:foreground="@null"
+            android:stateListAnimator="@null"
             android:gravity="center"
             android:minWidth="70dp"
             android:orientation="horizontal"

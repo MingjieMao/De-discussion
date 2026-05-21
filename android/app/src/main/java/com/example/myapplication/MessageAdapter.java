@@ -198,7 +198,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         void display(Message message, boolean showTopSeparator, boolean showReplyToggle, boolean expanded) {
             int upvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.vote_up);
-            int neutralColor = ContextCompat.getColor(itemView.getContext(), R.color.ink_secondary);
+            int neutralColor = ContextCompat.getColor(itemView.getContext(), R.color.ink_faint);
             int downvoteColor = ContextCompat.getColor(itemView.getContext(), R.color.vote_down);
             int primaryColor = ContextCompat.getColor(itemView.getContext(), R.color.ink_primary);
             int reportColor = ContextCompat.getColor(itemView.getContext(), R.color.danger_ink);
@@ -250,22 +250,23 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                     textMessageReplyToggle.setText(itemView.getContext().getString(R.string.action_expand_replies, hiddenReplies));
                 }
                 textMessageReplyToggle.setVisibility(View.VISIBLE);
+                textMessageReplyToggle.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.ink_secondary));
             } else {
                 textMessageReplyToggle.setVisibility(View.GONE);
             }
 
             int voteDirection = AppData.getCurrentUserMessageVote(message);
             buttonMessageUpvote.setImageResource(voteDirection > 0
-                    ? R.drawable.ic_vote_up_filled_24
-                    : R.drawable.ic_vote_up_outline_24);
+                    ? R.drawable.ic_message_vote_up_filled_24
+                    : R.drawable.ic_message_vote_up_outline_24);
             buttonMessageDownvote.setImageResource(voteDirection < 0
-                    ? R.drawable.ic_vote_down_filled_24
-                    : R.drawable.ic_vote_down_outline_24);
+                    ? R.drawable.ic_message_vote_down_filled_24
+                    : R.drawable.ic_message_vote_down_outline_24);
             boolean activeAction = AppData.isAdminMode() ? AppData.isHidden(message) : AppData.hasCurrentUserReported(message);
             if (AppData.isAdminMode()) {
                 buttonMessageMenu.setImageResource(R.drawable.ic_hidden_24);
             } else {
-                buttonMessageMenu.setImageResource(activeAction ? R.drawable.ic_flag_24 : R.drawable.ic_flag_outline_24);
+                buttonMessageMenu.setImageResource(R.drawable.ic_flag_outline_24);
             }
             buttonMessageMenu.setColorFilter(activeAction ? reportColor : neutralColor);
             imageMessageReplyIcon.setColorFilter(primaryColor);

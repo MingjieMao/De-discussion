@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/queueRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,10 +12,13 @@
         android:id="@+id/buttonQueueBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/accent_strong"
+        app:backgroundTint="@color/tab_bar_fill"
+        app:strokeColor="@color/surface_border"
+        app:strokeWidth="1.5dp"
+        app:cornerRadius="999dp"
         android:text="@string/action_back"
         android:textAllCaps="false"
-        android:textColor="@color/white" />
+        android:textColor="@color/ink_primary" />
 
     <TextView
         android:id="@+id/textQueueTitle"
@@ -46,10 +50,17 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:backgroundTint="@color/warning_ink"
+            app:backgroundTint="@color/tab_bar_fill"
+            app:strokeColor="@color/surface_border"
+            app:strokeWidth="1.5dp"
+            app:cornerRadius="999dp"
+            app:icon="@drawable/ic_flag_outline_24"
+            app:iconSize="16dp"
+            app:iconTint="@color/ink_primary"
+            app:iconGravity="textStart"
             android:text="@string/action_oldest_first"
             android:textAllCaps="false"
-            android:textColor="@color/white" />
+            android:textColor="@color/ink_primary" />
 
         <Button
             android:id="@+id/buttonMost"
@@ -57,10 +68,17 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:backgroundTint="@color/warning_ink"
+            app:backgroundTint="@color/tab_bar_fill"
+            app:strokeColor="@color/surface_border"
+            app:strokeWidth="1.5dp"
+            app:cornerRadius="999dp"
+            app:icon="@drawable/ic_flag_outline_24"
+            app:iconSize="16dp"
+            app:iconTint="@color/ink_primary"
+            app:iconGravity="textStart"
             android:text="@string/action_most_reports"
             android:textAllCaps="false"
-            android:textColor="@color/white" />
+            android:textColor="@color/ink_primary" />
     </LinearLayout>
 
     <TextView

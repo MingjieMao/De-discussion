@@ -7,7 +7,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
@@ -90,6 +93,12 @@ public class ReportedMessageAdapter extends RecyclerView.Adapter<ReportedMessage
             textReportedContent.setText(message.message());
             textReportedMeta.setText(AppData.getReportedCardMeta(itemView.getContext(), message));
             buttonReportedAction.setText(AppData.getMessageActionLabel(itemView.getContext(), message));
+            MaterialButton btn = (MaterialButton) buttonReportedAction;
+            btn.setIcon(ContextCompat.getDrawable(itemView.getContext(), R.drawable.ic_hidden_24));
+            int iconColor = AppData.isHidden(message)
+                    ? ContextCompat.getColor(itemView.getContext(), R.color.danger_ink)
+                    : ContextCompat.getColor(itemView.getContext(), R.color.ink_faint);
+            btn.setIconTint(android.content.res.ColorStateList.valueOf(iconColor));
         }
     }
 }
