@@ -69,6 +69,7 @@ public final class AppData {
     private static final Map<UserVoteKey, Integer> USER_VOTES = new HashMap<>();
     private static final Set<UUID> FOLLOWED_USERS = new HashSet<>();
     private static final Set<UUID> BOOKMARKED_POSTS = new HashSet<>();
+    private static final Set<UUID> DELETED_POSTS = new HashSet<>();
     private static final ArrayList<AppNotification> SEEDED_NOTIFICATIONS = new ArrayList<>();
 
     private static boolean populated;
@@ -116,6 +117,7 @@ public final class AppData {
         USER_VOTES.clear();
         FOLLOWED_USERS.clear();
         BOOKMARKED_POSTS.clear();
+        DELETED_POSTS.clear();
         SEEDED_NOTIFICATIONS.clear();
 
         seedUsers();
@@ -238,6 +240,9 @@ public final class AppData {
         Iterator<Post> iterator = PostDAO.getInstance().getAll();
         while (iterator.hasNext()) {
             Post post = iterator.next();
+            if (isDeletedPost(post)) {
+                continue;
+            }
             if (!selectedForumKey.equals(getForumKey(post))) {
                 continue;
             }
@@ -306,14 +311,16 @@ public final class AppData {
         if (postId == null) {
             return null;
         }
-        return PostDAO.getInstance().get(new Post(UUID.fromString(postId)));
+        Post post = PostDAO.getInstance().get(new Post(UUID.fromString(postId)));
+        return isDeletedPost(post) ? null : post;
     }
 
     public static Post getPostForMessage(Message message) {
         if (message == null) {
             return null;
         }
-        return PostDAO.getInstance().get(new Post(message.thread()));
+        Post post = PostDAO.getInstance().get(new Post(message.thread()));
+        return isDeletedPost(post) ? null : post;
     }
 
     public static Message getRootMessage(Post post) {
@@ -775,7 +782,7 @@ public final class AppData {
     public static boolean updatePost(Post post, String title, String body, String category, String imageUri) {
         ensurePopulated();
         UUID currentUserId = getCurrentUserId();
-        if (post == null || currentUserId == null || !currentUserId.equals(post.poster)) {
+        if (post == null || isDeletedPost(post) || currentUserId == null || !currentUserId.equals(post.poster)) {
             return false;
         }
         String trimmedTitle = title == null ? "" : title.trim();
@@ -793,6 +800,29 @@ public final class AppData {
             POST_IMAGE_URIS.put(post.id, trimmedImageUri);
         }
         return true;
+    }
+
+    public static boolean deletePost(Post post) {
+        ensurePopulated();
+        UUID currentUserId = getCurrentUserId();
+        if (post == null || currentUserId == null || !currentUserId.equals(post.poster)) {
+            return false;
+        }
+        DELETED_POSTS.add(post.id);
+        POST_TITLE_OVERRIDES.remove(post.id);
+        POST_BODY_OVERRIDES.remove(post.id);
+        POST_IMAGE_URIS.remove(post.id);
+        POST_CATEGORIES.remove(post.id);
+        POST_TOP_RANKS.remove(post.id);
+        BASE_BOOKMARKS.remove(post.id);
+        BASE_VOTES.keySet().removeIf(key -> key.targetId().equals(post.id));
+        BOOKMARKED_POSTS.remove(post.id);
+        USER_VOTES.keySet().removeIf(key -> key.targetId().equals(post.id));
+        return true;
+    }
+
+    public static boolean isDeletedPost(Post post) {
+        return post != null && DELETED_POSTS.contains(post.id);
     }
 
     public static Message createReply(Message parent, String content) {
@@ -858,7 +888,7 @@ public final class AppData {
         Iterator<Post> iterator = PostDAO.getInstance().getAll();
         while (iterator.hasNext()) {
             Post post = iterator.next();
-            if (post != null && BOOKMARKED_POSTS.contains(post.id)) {
+            if (post != null && !isDeletedPost(post) && BOOKMARKED_POSTS.contains(post.id)) {
                 posts.add(post);
             }
         }
@@ -872,7 +902,7 @@ public final class AppData {
         Iterator<Post> iterator = PostDAO.getInstance().getAll();
         while (iterator.hasNext()) {
             Post post = iterator.next();
-            if (post != null && getCurrentUserPostVote(post) > 0) {
+            if (post != null && !isDeletedPost(post) && getCurrentUserPostVote(post) > 0) {
                 posts.add(post);
             }
         }
@@ -1151,6 +1181,9 @@ public final class AppData {
         Iterator<Post> iterator = PostDAO.getInstance().getAll();
         while (iterator.hasNext()) {
             Post post = iterator.next();
+            if (isDeletedPost(post)) {
+                continue;
+            }
             if (post.poster != null && post.poster.equals(userId)) {
                 posts.add(post);
             }
@@ -1168,6 +1201,9 @@ public final class AppData {
         Iterator<Post> postIterator = PostDAO.getInstance().getAll();
         while (postIterator.hasNext()) {
             Post post = postIterator.next();
+            if (isDeletedPost(post)) {
+                continue;
+            }
             Iterator<Message> messageIterator = (adminMode
                     ? post.messages
                     : post.getVisibleMessages(false)).getAll();

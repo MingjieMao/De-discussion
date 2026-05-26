@@ -61,6 +61,9 @@
     <string name="action_switch_account">切换账号</string>
     <string name="action_logout">退出账号</string>
     <string name="action_edit_post">编辑帖子</string>
+    <string name="action_delete_post">删除帖子</string>
+    <string name="dialog_delete_post_message">确定要删除这条帖子吗？删除后不能恢复。</string>
+    <string name="toast_post_deleted">帖子已删除。</string>
     <string name="action_login">登录</string>
     <string name="action_follow">关注</string>
     <string name="action_following">已关注</string>

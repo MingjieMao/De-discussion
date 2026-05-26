@@ -43,6 +43,18 @@
             android:visibility="gone"
             app:tint="@color/ink_primary" />
 
+        <ImageButton
+            android:id="@+id/buttonPostDelete"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_pill"
+            android:contentDescription="@string/action_delete_post"
+            android:padding="11dp"
+            android:src="@drawable/ic_delete_24"
+            android:visibility="gone"
+            app:tint="@color/danger_ink" />
+
         <TextView
             android:id="@+id/textPostViewerMode"
             android:layout_width="wrap_content"

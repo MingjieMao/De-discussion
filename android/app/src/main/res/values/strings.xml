@@ -61,6 +61,9 @@
     <string name="action_switch_account">Switch account</string>
     <string name="action_logout">Log out</string>
     <string name="action_edit_post">Edit post</string>
+    <string name="action_delete_post">Delete post</string>
+    <string name="dialog_delete_post_message">Delete this post? This cannot be undone.</string>
+    <string name="toast_post_deleted">Post deleted.</string>
     <string name="action_login">Log in</string>
     <string name="action_follow">Follow</string>
     <string name="action_following">Following</string>

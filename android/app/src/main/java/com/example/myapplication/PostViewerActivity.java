@@ -68,6 +68,7 @@ public class PostViewerActivity extends AppCompatActivity {
     private Button buttonBack;
     private ImageButton buttonPostMenu;
     private ImageButton buttonPostEdit;
+    private ImageButton buttonPostDelete;
     private NestedScrollView postViewerScroll;
     private RecyclerView recyclerMessages;
     private Post post;
@@ -150,6 +151,7 @@ public class PostViewerActivity extends AppCompatActivity {
         buttonBack = findViewById(R.id.buttonBack);
         buttonPostMenu = findViewById(R.id.buttonPostMenu);
         buttonPostEdit = findViewById(R.id.buttonPostEdit);
+        buttonPostDelete = findViewById(R.id.buttonPostDelete);
         postViewerScroll = findViewById(R.id.postViewerScroll);
         recyclerMessages = findViewById(R.id.recyclerMessages);
 
@@ -176,6 +178,7 @@ public class PostViewerActivity extends AppCompatActivity {
             }
         });
         buttonPostEdit.setOnClickListener(v -> openPostEditor());
+        buttonPostDelete.setOnClickListener(v -> confirmDeletePost());
         buttonPostComments.setOnClickListener(v -> showReplyDialog(rootMessage));
         textPostViewerMeta.setOnClickListener(v -> openUserProfile(post == null ? null : post.poster));
         textPostViewerAuthorAvatar.setOnClickListener(v -> openUserProfile(post == null ? null : post.poster));
@@ -204,14 +207,17 @@ public class PostViewerActivity extends AppCompatActivity {
             textPostViewerBody.setText(R.string.post_not_found_summary);
             textPostViewerState.setVisibility(View.GONE);
             buttonPostEdit.setVisibility(View.GONE);
+            buttonPostDelete.setVisibility(View.GONE);
             textCommentsEmpty.setVisibility(View.VISIBLE);
             recyclerMessages.setAdapter(new MessageAdapter(new ArrayList<>()));
             return;
         }
 
         rootMessage = AppData.getRootMessage(post);
-        buttonPostEdit.setVisibility(AppData.getCurrentUserId() != null
-                && AppData.getCurrentUserId().equals(post.poster) ? View.VISIBLE : View.GONE);
+        boolean ownsPost = AppData.getCurrentUserId() != null
+                && AppData.getCurrentUserId().equals(post.poster);
+        buttonPostEdit.setVisibility(ownsPost ? View.VISIBLE : View.GONE);
+        buttonPostDelete.setVisibility(ownsPost ? View.VISIBLE : View.GONE);
         textPostViewerMode.setText(AppData.getCurrentModeLabel(this));
         textPostViewerForum.setText(AppData.getPostCommunityLabel(this, post));
         GradientDrawable authorAvatarBg = new GradientDrawable();
@@ -287,6 +293,25 @@ public class PostViewerActivity extends AppCompatActivity {
         Intent intent = new Intent(this, CreatePostActivity.class);
         intent.putExtra(CreatePostActivity.EXTRA_EDIT_POST_ID, post.id.toString());
         startActivity(intent);
+    }
+
+    private void confirmDeletePost() {
+        if (post == null) {
+            return;
+        }
+        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                .setTitle(R.string.action_delete_post)
+                .setMessage(R.string.dialog_delete_post_message)
+                .setNegativeButton(R.string.action_cancel, null)
+                .setPositiveButton(R.string.action_delete_post, (dialog, which) -> {
+                    if (AppData.deletePost(post)) {
+                        Toast.makeText(this, R.string.toast_post_deleted, Toast.LENGTH_SHORT).show();
+                        finish();
+                    } else {
+                        Toast.makeText(this, R.string.toast_action_failed, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
     }
 
     private void updatePostVoteColors() {
