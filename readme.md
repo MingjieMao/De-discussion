@@ -1,115 +1,71 @@
-# Hackathon 2026s1: moderation tools
+# De
 
-We implemented Admin users back in week 3 of the miniproject, but they don't have any functionality. Today, we will implement additional moderation tools to help Admins. Precisely speaking, we are interested in a program flow where Users may report messages. Admins are then able to review reported messages, and hide messages that contain e.g. abusive content. This additional functionality has some skeleton code provided in the module `moderation`.
+De 是一个校园讨论社区 Android 应用 Demo，由 404 Sleep Not Found 团队开发。
 
-As a group, you must decide on the architecture for your program. You are provided a copy of the miniproject from week 5, with  solutions to some lab tasks, to use as a base.
+它把校园论坛、审核机制和学校热度代币玩法结合在一起。用户可以在不同学校频道中浏览帖子、发布带图片的内容、查看多层评论；管理员可以处理举报内容；同时还可以参与基于社区活跃度生成的 Heat Market 和排行榜。
 
-Follow the following guidelines when writing code:
-- You may write your code anywhere within the `app/src` folder, including by adding new files and classes.
-- Do not modify the contents of the `ReactionType` enum.
+## 项目亮点
 
-To reiterate, you may augment existing code, including that which is unrelated to the hackathon, as you please. For example, if you want to implement a red-black tree, you may create a new package within `app/src/persistentdata` to do so.
+- 多学校频道切换，不同频道有不同视觉风格
+- 支持发帖、图片上传和评论互动
+- 评论区支持展开与折叠，移动端阅读更清晰
+- 提供成员模式和管理员模式
+- 管理员可在举报队列中快速查看和处理被举报内容
+- 引入学校代币系统，热度由帖子、回复和点赞共同驱动
+- 通过排行榜展示不同用户的市场表现
+- 每日余额重置，保证玩法持续可体验
 
-### Getting started
+## 界面预览
 
-It is necessary to make some design decisions about the additional module's architecture. We strongly recommend you begin by skimming each of the tasks, not just your own, to understand how the module will come together. Then, you should discuss the architecture *as a group*, considering questions such as:
+| 首页信息流 | 评论区 |
+| --- | --- |
+| ![首页信息流](picture/feed.png) | ![评论区](picture/comments.png) |
 
-- How will we abstractly represent a report?
-- Which data structures will we use to store multiple reports?
-- How will we represent a hidden message?
-- How can we store these types of data persistently?
-- What features are bottlenecks? In other words, which members of the group must finish certain aspects of their task before others can begin?
-- Are any aspects of the design important to allow you to complete your task efficiently (in terms of programming time, runtime, or memory usage)? You may need to negotiate some trade-offs with other members here.
+| Heat Market | 排行榜 |
+| --- | --- |
+| ![Heat Market](picture/market.png) | ![排行榜](picture/leaderboard.png) |
 
-Only once you have reached a consensus about design should you begin programming.
+## Demo 体验流程
 
-### Git and submission notes
+1. 使用 Demo 账号登录
+2. 选择 Member 或 Admin
+3. 浏览不同学校频道中的帖子
+4. 在成员模式下举报评论
+5. 在管理员模式下进入审核队列处理举报
+6. 在 Heat Market 中交易学校代币并查看排行榜
 
-As a group, please make a single fork of the `hackathon` repo. When forking, please leave the project name and slug unchanged, and set the visibility to private.
+## Demo 账号
 
-In the GitLab web view for your fork, go to **Manage** > **Members** in the sidebar. Check that the COMP2100 marker bot has been added (let staff know if it hasn't), and add the accounts of each of the other group members. You will want to give them **Maintainer** permissions, so that they can freely push to the repo.
+用户名：1234
 
-Each group member should then clone this fork to their personal device to work on the hackathon. You will need to set up your clone in IntelliJ by setting the SDK and importing JUnit, like in the first part of the miniproject.
+密码：1234
 
-You may use Git branches as you please throughout your group, but assessment will be based purely on the final commit to the `main` branch before the deadline. Git etiquette will not be considered during marking.
+## 技术栈
 
-Your code **must** compile to receive marks.
+- Java
+- Android SDK
+- Gradle
+- 自定义审核模块与数据结构模块
 
-## Task information
+## 项目结构
 
-### Task 1: reporting functionality (software design, data structures)
+- android/：Android 应用代码与资源文件
+- android/app/src/main/java/com/example/myapplication/：页面、组件与主要业务逻辑
+- android/app/src/main/java/moderation/：举报、隐藏、审核队列相关逻辑
+- app/src/：仓库中保留的原始课程侧 Java 模块
+- picture/：README 展示用项目截图
 
-Any User will be able to report any Message for moderators to review.
+## 运行方式
 
-\[50%] Reports are transmitted to the application through a call to `boolean ModerationTools.addReport(UUID message, UUID user, long timestamp)` which returns true if the report was successfully received. If the message or user does not exist, or if that user has already reported that message, do nothing and return false.
+用 Android Studio 打开 android/
 
-They are also able to retract their reports through `ModerationTools.removeReport`. This returns true if the report was successfully removed, and false if the user was not reporting that message or if either UUID does not exist. There is no need to maintain a record of which Users have removed reports.
+等待 Gradle 同步完成
 
-You must also implement the function `ModerationTools.hasReported`, which checks whether the given user has reported the given message.
+在模拟器或真机上运行应用
 
-Note that even if a message is 'hidden' by a moderator, the reports attached to it should still remain in memory.
+也可以使用命令行构建：
 
-\[30%] Like the rest of our application, performance is important. You should choose an appropriate architecture to store reports, with particular consideration towards the use of classes and data structures to maximise efficiency. This performance requirement applies only to the code written for this task, not any pre-existing code in the project.
-
-\[20%] Your code should be high quality.
-
-### Task 2: hiding messages functionality (data structures, trees)
-
-Admin users should be able to hide and unhide Messages at will for moderation purposes. Hidden messages will not be visible to non-Admin users.
-
-\[40%] Implement the function `ModerationTools.setHidden(UUID message, UUID user, boolean hidden)`. This function should check that the UUIDs exist and that the corresponding User is an Admin. If these checks fail, do nothing and return false. Otherwise, update the message's state according to the hidden parameter. Note that when a message is first posted, it is visible by default.
-
-\[40%] You must also update the message-fetching logic to react to Messages changing visibility. In particular, Admin users should always be able to see messages, but other Users and Guests should only be able to see non-hidden messages. To implement this, we have created the function `Post.getVisibleMessages(boolean isAdmin)`. You should implement this function to return a SortedData that, if isAdmin is true, contains all the messages to that post; if isAdmin is false, only the non-hidden messages should be included.
-
-\[20%] Your code should be high quality.
-
-### Task 3: Persistence and refactoring
-
-\[60%] The functionality for both task 1 (user reports) and task 2 (hiding messaages) should persist across runs of the application. There are no methods within the provided ModerationTools interface that must be implemented; instead, you must modify the existing code for persistence to support the changes made in Task 1 and Task 2.
-
-The data written to persistent storage for this task will also be read by other applications, some of which will be written in programming languages other than Java. Therefore, when choosing how to represent this data, you should select a portable representation.
-
-\[40%] The code that you write for this task must be high quality, beyond the level expected for the other tasks. Check your code for any remaining code smells and refactor if they are present.
-
-### Task 4: viewing reports (design patterns)
-
-Moderators should be able to view reports submitted by Users in order to act on them.
-
-\[40%] To do this, implement the function `Iterator<Message> ModerationTools.getReportedMessages(String strategy, int amount)`
-This function expects that strategy is either "OLDEST" or "MOST" and that amount is a positive integer. You should throw an exception otherwise.
-
-If the strategy is "OLDEST", return the reported Messages ordered by the timestamp of their oldest non-removed report. That is, the post with the oldest report should be returned first. If the strategy is "MOST", then the returned Messages should be sorted by the number of active (non-removed) reports on them. That is, the post with the most active reports should be returned first.
-
-If there is a tie in the relevant ordering -- meaning two Messages have oldest reports with the same timestamp, or the same number of reports -- you may return those Messages in an arbitrary order.
-
-Do not return Messages that have zero active reports. You should return the specified amount of messages, or fewer if there are insufficiently many reported Messages. If a message has been reported multiple times, it should only be included at most once in the output.
-
-\[40%] It is mandatory that you use both the Iterator and Factory patterns while implementing this task. You must decide where and how these patterns can most appropriately be implemented.
-
-\[20%] Your code should be high quality.
-
-### Task 5: unit testing
-
-In this task, you will use JUnit4 to write test cases for some of the functionality implemented for this hackathon.
-
-\[40%] Write unit tests that achieve branch-complete coverage on `ModerationTools.addReport`, including any submethods called from addReport that were written by your team in this hackathon. Refer to Task 1 for the specification of this function. Write these tests in the ModerationToolsAddReportTests class in the unit test folder.
-
-\[40%] Write black-box unit tests for the method `ModerationTools.getReportedMessages`. Your tests should be able to distinguish between a correct and faulty implementation of getReportedMessages, assuming that all other functionality is correct. Refer to Task 4 for the specification of this function. Write these tests in the ModerationToolsGetReportsTests class.
-
-These tests do not need to be parameterised; please test only the implementation in the codebase, using only `getReportedMessages` as an entry point for testing.
-
-\[20%] Your code should be high quality.
-
-### Group task (UML)
-
-Produce a UML diagram illustrating the architecture of the moderation tools.
-
-\[50%] At minimum, your UML diagram should include at least
-- five classes, including the ModerationTools class
-- one private, one protected, and one public field
-- two static and two non-static methods
-- one example of each of composition, aggregation, and association
-
-\[50%] Your UML diagram should be informative and useful to a reader who wants to understand the architecture of your project. This means the selection of features should be wide enough to show the reader the overall architecture but narrow enough that irrelevancies are excluded, and they should be arranged well.
-
-You can either draw your diagram on paper and take a photo, or use online tools and take a screenshot. Once you've finished, upload this photo or screenshot to your Git fork by replacing the file `uml.png`.
+```bash
+cd android
+./gradlew assembleDebug
+```
