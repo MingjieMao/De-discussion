@@ -1,15 +1,11 @@
 package com.example.myapplication;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -21,8 +17,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -264,12 +258,6 @@ public class UserProfileActivity extends AppCompatActivity {
         return posts;
     }
 
-    private ArrayList<Post> getEngagedPosts() {
-        ArrayList<Post> posts = AppData.getPostsByUser(userId);
-        posts.removeIf(post -> AppData.getPostVoteScore(post) + AppData.getPostBookmarkCount(post) <= 0);
-        return posts;
-    }
-
     private void styleTabs() {
         styleTab(buttonProfileTabPosts, selectedSection == Section.POSTS);
         styleTab(buttonProfileTabComments, selectedSection == Section.COMMENTS);
@@ -291,137 +279,22 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void showUserList(int titleResId, ArrayList<User> users) {
-        LinearLayout content = buildDialogContent(titleResId);
-        androidx.appcompat.app.AlertDialog[] dialogHolder = new androidx.appcompat.app.AlertDialog[1];
-        if (users.isEmpty()) {
-            TextView empty = makeDialogItem(getString(R.string.profile_list_empty));
-            content.addView(empty);
-        }
-        for (User user : users) {
-            TextView item = makeDialogItem(AppData.getDisplayName(this, user.id()));
-            item.setOnClickListener(v -> {
-                if (dialogHolder[0] != null) dialogHolder[0].dismiss();
-                Intent intent = new Intent(this, UserProfileActivity.class);
-                intent.putExtra(EXTRA_USER_ID, user.id().toString());
-                startActivity(intent);
-            });
-            content.addView(item);
-        }
-        showListDialog(content, dialogHolder);
-    }
-
-    private void showPostList(int titleResId, ArrayList<Post> posts) {
-        LinearLayout content = buildDialogContent(titleResId);
-        androidx.appcompat.app.AlertDialog[] dialogHolder = new androidx.appcompat.app.AlertDialog[1];
-        if (posts.isEmpty()) {
-            content.addView(makeDialogItem(getString(R.string.profile_list_empty)));
-        }
-        for (Post post : posts) {
-            TextView item = makeDialogItem(AppData.getPostTitle(post));
-            item.setOnClickListener(v -> {
-                if (dialogHolder[0] != null) dialogHolder[0].dismiss();
-                openPost(post);
-            });
-            content.addView(item);
-        }
-        showListDialog(content, dialogHolder);
+        ProfileInsightDialog.showUsers(this, titleResId, users, clickedUserId -> {
+            Intent intent = new Intent(this, UserProfileActivity.class);
+            intent.putExtra(EXTRA_USER_ID, clickedUserId.toString());
+            startActivity(intent);
+        });
     }
 
     private void showEngagementStatsDialog(UUID targetUserId) {
-        LinearLayout content = buildDialogContent(R.string.you_engagement);
-        androidx.appcompat.app.AlertDialog[] dialogHolder = new androidx.appcompat.app.AlertDialog[1];
-        content.addView(makeEngagementStatRow(R.drawable.ic_channel_24,
+        ArrayList<ProfileInsightDialog.StatItem> stats = new ArrayList<>();
+        stats.add(new ProfileInsightDialog.StatItem(R.drawable.ic_channel_24,
                 R.string.engagement_posts_label, AppData.getPostsByUser(targetUserId).size()));
-        content.addView(makeEngagementStatRow(R.drawable.ic_vote_up_filled_24,
+        stats.add(new ProfileInsightDialog.StatItem(R.drawable.ic_vote_up_filled_24,
                 R.string.engagement_likes_label, AppData.getReceivedLikeCount(targetUserId)));
-        content.addView(makeEngagementStatRow(R.drawable.ic_bookmark_filled_24,
+        stats.add(new ProfileInsightDialog.StatItem(R.drawable.ic_bookmark_filled_24,
                 R.string.engagement_saves_label, AppData.getReceivedBookmarkCount(targetUserId)));
-        showListDialog(content, dialogHolder);
-    }
-
-    private LinearLayout buildDialogContent(int titleResId) {
-        LinearLayout content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setBackgroundResource(R.drawable.bg_avatar_picker_dialog);
-        content.setPadding(dp(20), dp(18), dp(20), dp(14));
-
-        TextView title = new TextView(this);
-        title.setText(titleResId);
-        title.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
-        title.setTextSize(20);
-        title.setTypeface(Typeface.DEFAULT_BOLD);
-        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        titleParams.setMargins(0, 0, 0, dp(10));
-        content.addView(title, titleParams);
-        return content;
-    }
-
-    private TextView makeDialogItem(String label) {
-        TextView item = new TextView(this);
-        item.setText(label);
-        item.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
-        item.setTextSize(16);
-        item.setPadding(0, dp(12), 0, dp(12));
-        return item;
-    }
-
-    private View makeEngagementStatRow(int iconResId, int labelResId, int count) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, dp(12), 0, dp(12));
-
-        ImageView icon = new ImageView(this);
-        icon.setImageResource(iconResId);
-        icon.setColorFilter(ContextCompat.getColor(this, R.color.ink_secondary));
-        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dp(22), dp(22));
-        iconParams.setMargins(0, 0, dp(12), 0);
-        row.addView(icon, iconParams);
-
-        TextView label = new TextView(this);
-        label.setText(labelResId);
-        label.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
-        label.setTextSize(16);
-        LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-        row.addView(label, labelParams);
-
-        TextView value = new TextView(this);
-        value.setText(String.valueOf(count));
-        value.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
-        value.setTextSize(18);
-        value.setTypeface(Typeface.DEFAULT_BOLD);
-        row.addView(value);
-        return row;
-    }
-
-    private void showListDialog(LinearLayout content, androidx.appcompat.app.AlertDialog[] dialogHolder) {
-        TextView cancelBtn = new TextView(this);
-        cancelBtn.setText(R.string.action_cancel);
-        cancelBtn.setTextColor(ContextCompat.getColor(this, R.color.ink_primary));
-        cancelBtn.setTextSize(14);
-        cancelBtn.setTypeface(Typeface.DEFAULT_BOLD);
-        cancelBtn.setPadding(dp(12), dp(10), dp(4), dp(8));
-        LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        cancelParams.gravity = Gravity.END;
-        cancelParams.setMargins(0, dp(8), 0, 0);
-
-        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(
-                this, R.style.ThemeOverlay_App_MaterialAlertDialog)
-                .setView(content)
-                .create();
-        dialogHolder[0] = dialog;
-        cancelBtn.setOnClickListener(v -> dialog.dismiss());
-        content.addView(cancelBtn, cancelParams);
-
-        dialog.show();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
+        ProfileInsightDialog.showStats(this, R.string.you_engagement, stats);
     }
 
     private int dp(int value) {
